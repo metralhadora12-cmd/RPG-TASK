@@ -1,0 +1,277 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-pixel: 'Press Start 2P', ui-monospace, monospace;
+  --font-body: 'VT323', ui-monospace, monospace;
+  --font-readable: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --color-win-text: var(--win-text);
+  --color-win-dim: var(--win-text-dim);
+  --color-win-accent: var(--win-accent);
+}
+
+/* Valores padrão (tema Azul Clássico) — substituídos em runtime pelo ThemeProvider. */
+:root {
+  --win-top: #3a4fb8;
+  --win-bottom: #10186b;
+  --win-border-outer: #08081c;
+  --win-border-light: #f8f8f8;
+  --win-border-mid: #9098b8;
+  --win-text: #f8f8f8;
+  --win-text-dim: #c8d0f8;
+  --win-text-shadow: #08081c;
+  --win-accent: #f8e070;
+  --backdrop: #050514;
+  --body-font: var(--font-body);
+  --body-size: 1.35rem;
+  color-scheme: dark;
+}
+
+:root.font-readable {
+  --body-font: var(--font-readable);
+  --body-size: 1rem;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--backdrop);
+    color: var(--win-text);
+    font-family: var(--body-font);
+    font-size: var(--body-size);
+    line-height: 1.25;
+    -webkit-font-smoothing: none;
+  }
+
+  img,
+  canvas,
+  svg.pixel {
+    image-rendering: pixelated;
+  }
+}
+
+@layer components {
+  .font-title {
+    font-family: var(--font-pixel);
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+  }
+
+  /* ---------- Janela 16-bit ---------- */
+  .win {
+    position: relative;
+    color: var(--win-text);
+    background: linear-gradient(to bottom, var(--win-top), var(--win-bottom));
+    border: 2px solid var(--win-border-outer);
+    border-radius: 6px;
+    box-shadow:
+      inset 0 0 0 2px var(--win-border-light),
+      inset 0 0 0 4px var(--win-border-mid),
+      0 3px 0 0 var(--win-border-outer);
+    padding: 14px 16px;
+  }
+
+  .win-title {
+    font-family: var(--font-pixel);
+    font-size: 0.7rem;
+    color: var(--win-accent);
+    margin: 0 0 10px;
+    text-shadow: 2px 2px 0 var(--win-text-shadow);
+  }
+
+  .text-shadow-pixel {
+    text-shadow: 2px 2px 0 var(--win-text-shadow);
+  }
+
+  /* ---------- Botão ---------- */
+  .px-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-pixel);
+    font-size: 0.65rem;
+    line-height: 1;
+    padding: 10px 14px 10px 30px;
+    color: var(--win-text);
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    text-shadow: 2px 2px 0 var(--win-text-shadow);
+    user-select: none;
+  }
+  .px-btn[data-variant='solid'] {
+    background: linear-gradient(to bottom, var(--win-top), var(--win-bottom));
+    border-color: var(--win-border-outer);
+    box-shadow: inset 0 0 0 2px var(--win-border-mid);
+  }
+  .px-btn[data-variant='danger'] {
+    color: #ffb0a8;
+  }
+  .px-btn:hover,
+  .px-btn:focus-visible,
+  .px-btn[data-active='true'] {
+    color: var(--win-accent);
+    outline: none;
+  }
+  .px-btn:focus-visible {
+    box-shadow: 0 0 0 2px var(--win-accent);
+  }
+  .px-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .px-btn .px-cursor-slot {
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  /* ---------- Cursor (mãozinha) ---------- */
+  @keyframes cursor-bob {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(-3px);
+    }
+  }
+  .px-cursor {
+    display: inline-block;
+    animation: cursor-bob 0.6s steps(2, jump-none) infinite;
+    filter: drop-shadow(1px 1px 0 var(--win-border-outer));
+  }
+
+  /* ---------- Barras ---------- */
+  .px-bar {
+    height: 10px;
+    background: var(--win-border-outer);
+    border: 2px solid var(--win-border-outer);
+    box-shadow: 0 0 0 1px var(--win-border-mid);
+    position: relative;
+    overflow: hidden;
+  }
+  .px-bar-fill {
+    height: 100%;
+    transition: width 0.5s steps(8, end), background-color 0.2s;
+    box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.35), inset 0 -2px 0 rgb(0 0 0 / 0.3);
+  }
+
+  /* ---------- Menu com cursor ---------- */
+  .px-menu-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    text-align: left;
+    padding: 6px 8px 6px 30px;
+    color: var(--win-text);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    border-radius: 3px;
+    text-shadow: 2px 2px 0 var(--win-text-shadow);
+  }
+  .px-menu-item[data-active='true'] {
+    color: var(--win-accent);
+    background: rgb(255 255 255 / 0.08);
+  }
+  .px-menu-item:focus-visible {
+    outline: 2px solid var(--win-accent);
+    outline-offset: -2px;
+  }
+  .px-menu-item .px-cursor-slot {
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  /* ---------- Abas ---------- */
+  .px-tab {
+    font-family: var(--font-pixel);
+    font-size: 0.6rem;
+    padding: 8px 10px;
+    color: var(--win-text-dim);
+    background: none;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    text-shadow: 2px 2px 0 var(--win-text-shadow);
+  }
+  .px-tab[aria-selected='true'] {
+    color: var(--win-accent);
+    border-bottom-color: var(--win-accent);
+  }
+  .px-tab:focus-visible {
+    outline: 2px solid var(--win-accent);
+  }
+
+  /* ---------- Campos ---------- */
+  .px-input {
+    width: 100%;
+    font: inherit;
+    color: var(--win-text);
+    background: rgb(0 0 0 / 0.35);
+    border: 2px solid var(--win-border-mid);
+    border-radius: 3px;
+    padding: 4px 8px;
+  }
+  .px-input:focus {
+    outline: none;
+    border-color: var(--win-accent);
+  }
+  .px-input::placeholder {
+    color: var(--win-text-dim);
+    opacity: 0.8;
+  }
+
+  /* ---------- Diálogo ---------- */
+  .px-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgb(0 0 12 / 0.65);
+  }
+
+  @keyframes caret-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  .px-caret {
+    display: inline-block;
+    animation: caret-blink 0.8s steps(1) infinite;
+    color: var(--win-accent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .px-cursor,
+  .px-caret {
+    animation: none;
+  }
+  .px-bar-fill {
+    transition: none;
+  }
+}
+:root.reduce-motion .px-cursor,
+:root.reduce-motion .px-caret {
+  animation: none;
+}
+:root.reduce-motion .px-bar-fill {
+  transition: none;
+}
