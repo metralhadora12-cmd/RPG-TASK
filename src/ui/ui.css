@@ -257,6 +257,128 @@
     animation: caret-blink 0.8s steps(1) infinite;
     color: var(--win-accent);
   }
+
+  /* ---------- Caixa de seleção ---------- */
+  .px-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: rgb(0 0 0 / 0.35);
+    border: 2px solid var(--win-border-light);
+    border-radius: 2px;
+    box-shadow: 2px 2px 0 var(--win-border-outer);
+    cursor: pointer;
+  }
+  .px-check:hover,
+  .px-check:focus-visible {
+    border-color: var(--win-accent);
+    outline: none;
+  }
+  .px-check:focus-visible {
+    box-shadow: 0 0 0 2px var(--win-accent);
+  }
+
+  /* ---------- Botão de ícone ---------- */
+  .px-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    min-height: 32px;
+    padding: 4px;
+    color: var(--win-text);
+    background: none;
+    border: 2px solid transparent;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .px-icon-btn:hover {
+    background: rgb(255 255 255 / 0.1);
+  }
+  .px-icon-btn:focus-visible {
+    outline: none;
+    border-color: var(--win-accent);
+  }
+  .px-icon-btn[aria-pressed='true'],
+  .px-icon-btn[aria-checked='true'] {
+    border-color: var(--win-accent);
+    background: rgb(255 255 255 / 0.12);
+  }
+
+  /* Cursor controlado por CSS: aparece no item focado/hover e, esmaecido, no atual. */
+  .px-cursor-auto {
+    visibility: hidden;
+  }
+  :is(.px-menu-item:hover, .px-menu-item:focus-visible) .px-cursor-auto {
+    visibility: visible;
+  }
+  .px-menu-item[aria-current='page'] .px-cursor-auto {
+    visibility: visible;
+    opacity: 0.55;
+  }
+  :is(.px-menu-item:hover, .px-menu-item:focus-visible) .px-cursor-auto {
+    opacity: 1;
+  }
+
+  /* ---------- Linha de tarefa ---------- */
+  .task-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 6px 6px 30px;
+    border-radius: 3px;
+    background: rgb(0 0 0 / 0.12);
+  }
+  .task-row[data-active='true'] {
+    background: rgb(255 255 255 / 0.08);
+  }
+  .task-row[data-dragging='true'] {
+    z-index: 10;
+    background: var(--win-top);
+    box-shadow: 0 0 0 2px var(--win-accent);
+  }
+  .task-row .px-cursor-slot {
+    position: absolute;
+    left: 3px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .task-open {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    background: none;
+    border: 0;
+    padding: 2px 4px;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    border-radius: 3px;
+  }
+  .task-open:focus-visible {
+    outline: 2px solid var(--win-accent);
+  }
+  .task-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 10px;
+    font-size: 0.85em;
+    color: var(--win-text-dim);
+  }
+  .px-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 6px;
+    border: 2px solid var(--win-border-mid);
+    border-radius: 3px;
+    background: rgb(0 0 0 / 0.25);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,4 +1,5 @@
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router-dom';
+import { ListsPage, QuestsPage } from '@/features/tasks/components/QuestsPage';
 import { AppLayout } from './AppLayout';
 import { DevUiPage } from './pages/DevUiPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -10,7 +11,16 @@ export const routes: RouteObject[] = [
     element: <AppLayout />,
     children: [
       { index: true, element: <Navigate to="/missoes" replace /> },
-      { path: 'missoes/*', element: <PlaceholderPage title="page.quests.title" intro="page.quests.intro" phase={2} /> },
+      {
+        path: 'missoes',
+        children: [
+          { index: true, element: <Navigate to="meu-dia" replace /> },
+          { path: 'listas', element: <ListsPage /> },
+          { path: 'busca', element: <QuestsPage search /> },
+          { path: 'lista/:listId', element: <QuestsPage /> },
+          { path: ':slug', element: <QuestsPage /> },
+        ],
+      },
       {
         path: 'personagem',
         element: <PlaceholderPage title="page.character.title" intro="page.character.intro" phase={4} />,

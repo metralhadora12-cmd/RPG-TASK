@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from './Button';
 import { useMenuNavigation } from './useMenuNavigation';
@@ -22,6 +22,8 @@ export interface DialogProps {
   actions?: DialogAction[];
   /** Retrato/sprite do NPC ao lado do texto. */
   portrait?: ReactNode;
+  /** Elemento que recebe o foco ao abrir (padrão: primeira ação). */
+  initialFocusRef?: RefObject<HTMLElement | null>;
 }
 
 function TypedText({ text }: { text: string }) {
@@ -44,7 +46,7 @@ function TypedText({ text }: { text: string }) {
  * Janela de diálogo modal. Esc fecha, setas escolhem a ação, Enter confirma.
  * Enquanto o texto está sendo digitado, Enter revela o texto inteiro.
  */
-export function Dialog({ open, onClose, title, text, children, actions = [], portrait }: DialogProps) {
+export function Dialog({ open, onClose, title, text, children, actions = [], portrait, initialFocusRef }: DialogProps) {
   const descId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
   const nav = useMenuNavigation({
@@ -59,7 +61,7 @@ export function Dialog({ open, onClose, title, text, children, actions = [], por
     if (!open) return;
     const previous = document.activeElement as HTMLElement | null;
     const frame = requestAnimationFrame(() => {
-      (nav.itemRefs.current[0] ?? containerRef.current)?.focus();
+      (initialFocusRef?.current ?? nav.itemRefs.current[0] ?? containerRef.current)?.focus();
     });
     return () => {
       cancelAnimationFrame(frame);

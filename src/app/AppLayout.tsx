@@ -4,6 +4,10 @@ import { CursorSlot } from '@/ui/Cursor';
 import { PixelIcon } from '@/ui/PixelIcon';
 import { useMenuNavigation } from '@/ui/useMenuNavigation';
 import { Window } from '@/ui/Window';
+import { ListsPanel } from '@/features/tasks/components/ListsPanel';
+import { useReminders } from '@/features/tasks/useReminders';
+import { Toasts } from '@/ui/Toasts';
+import { useMediaQuery } from '@/ui/useMediaQuery';
 import { Hud } from './Hud';
 import { mainNav } from './navigation';
 import { navIcons } from './navIcons';
@@ -17,7 +21,7 @@ function Sidebar() {
   const { pathname } = useLocation();
   const nav = useMenuNavigation({ count: mainNav.length, initialIndex: activeNavIndex(pathname) });
   return (
-    <Window as="nav" aria-label={t('nav.main')} className="sticky top-20">
+    <Window as="nav" aria-label={t('nav.main')}>
       <ul className="flex flex-col gap-0.5" onKeyDown={nav.onKeyDown}>
         {mainNav.map((entry, i) => {
           const icon = navIcons[entry.icon];
@@ -67,6 +71,10 @@ function BottomTabs() {
 }
 
 export function AppLayout() {
+  const { pathname } = useLocation();
+  const wide = useMediaQuery('(min-width: 768px)');
+  const inQuests = wide && pathname.startsWith('/missoes');
+  useReminders();
   return (
     <div className="flex min-h-screen flex-col">
       <a
@@ -77,14 +85,22 @@ export function AppLayout() {
       </a>
       <Hud />
       <div className="mx-auto flex w-full max-w-6xl flex-1 gap-4 p-3 pb-28 sm:p-4 md:pb-4">
-        <aside className="hidden w-56 shrink-0 md:block">
-          <Sidebar />
+        <aside className="hidden w-64 shrink-0 md:block">
+          <div className="sticky top-20 flex max-h-[calc(100vh-6rem)] flex-col gap-4 overflow-y-auto pb-1">
+            <Sidebar />
+            {inQuests ? (
+              <Window as="div">
+                <ListsPanel />
+              </Window>
+            ) : null}
+          </div>
         </aside>
         <main id="conteudo" tabIndex={-1} className="min-w-0 flex-1 outline-none">
           <Outlet />
         </main>
       </div>
       <BottomTabs />
+      <Toasts />
     </div>
   );
 }

@@ -24,8 +24,8 @@ describe('App', () => {
 
   it('redireciona / para Missões e mostra HUD e navegação', async () => {
     const router = renderAt('/');
-    expect(await screen.findByRole('heading', { name: 'Missões' })).toBeInTheDocument();
-    expect(router.state.location.pathname).toBe('/missoes');
+    expect(await screen.findByRole('heading', { name: 'Meu Dia' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/missoes/meu-dia');
     expect(screen.getAllByRole('progressbar')).toHaveLength(3);
     expect(screen.getAllByRole('navigation', { name: 'Navegação principal' }).length).toBeGreaterThan(0);
   });

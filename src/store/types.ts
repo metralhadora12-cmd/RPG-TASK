@@ -29,8 +29,12 @@ export interface Task {
   important: boolean;
   /** Dia (yyyy-MM-dd) em que a tarefa foi adicionada ao "Meu Dia". */
   myDayDate?: string;
+  /** Vencimento (yyyy-MM-dd). */
   dueDate?: string;
+  /** Data/hora local (yyyy-MM-ddTHH:mm) do lembrete. */
   reminderAt?: string;
+  /** Quando o lembrete atual já foi disparado (evita repetir após recarregar). */
+  reminderFiredAt?: string;
   recurrence?: Recurrence;
   subtasks: Subtask[];
   tags: string[];
@@ -41,6 +45,8 @@ export interface Task {
   createdAt: string;
   updatedAt: string;
 }
+
+export type SortMode = 'manual' | 'dueDate' | 'importance' | 'difficulty' | 'alpha';
 
 export interface TaskList {
   id: string;

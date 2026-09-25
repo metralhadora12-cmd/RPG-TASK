@@ -1,11 +1,13 @@
 import { defaultSettings } from './defaults';
+import { inboxList } from './listActions';
+import type { TaskList } from './types';
 import type { PersistedState } from './useGameStore';
 
 /**
  * Versão atual do estado persistido. Ao mudar o formato do estado:
  * incremente, adicione um passo em `steps` e um teste em `migrations.test.ts`.
  */
-export const STORE_VERSION = 1;
+export const STORE_VERSION = 2;
 
 type Step = (state: Record<string, unknown>) => Record<string, unknown>;
 
@@ -21,6 +23,16 @@ const steps: Record<number, Step> = {
     tasks: state.tasks ?? [],
     rewardLog: state.rewardLog ?? [],
   }),
+  // v1 → v2: preferências de ordenação por visão e lista padrão "Tarefas".
+  1: (state) => {
+    const lists = (state.lists as TaskList[] | undefined) ?? [];
+    const inbox = inboxList();
+    return {
+      ...state,
+      viewPrefs: state.viewPrefs ?? {},
+      lists: lists.some((l) => l.id === inbox.id) ? lists : [inbox, ...lists],
+    };
+  },
 };
 
 export function migrate(persisted: unknown, fromVersion: number): PersistedState {
