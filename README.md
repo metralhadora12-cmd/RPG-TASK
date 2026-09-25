@@ -18,6 +18,14 @@ npm run preview    # serve o build
 
 Rode `npm run build && npm run preview` (ou publique a pasta `dist/` em qualquer hospedagem estática com HTTPS) e use "Instalar app" no navegador (Chrome/Edge no desktop; "Adicionar à tela inicial" no celular). Depois do primeiro carregamento, o QuestLog funciona **100% offline**: o service worker guarda todos os arquivos e os dados ficam no IndexedDB. Quando há uma versão nova, aparece o aviso "Nova versão disponível — Atualizar".
 
+## APK Android
+
+O app é empacotado com o [Capacitor](https://capacitorjs.com) (pasta `android/`): o mesmo app web roda dentro de um app nativo, com os dados no aparelho, 100% offline.
+
+- **Pelo GitHub Actions** (sem instalar nada): cada push roda o workflow `APK Android` (`.github/workflows/android-apk.yml`), que roda os testes, compila e publica o `app-debug.apk` como artefato `questlog-apk` na página da execução (aba **Actions**). Também dá para rodar manualmente em "Run workflow".
+- **Localmente** (precisa de JDK 21 e Android SDK/Android Studio): `npm run apk`. O arquivo sai em `android/app/build/outputs/apk/debug/app-debug.apk`.
+- Para instalar no celular, abra o `.apk` e permita "instalar apps de fontes desconhecidas". É um build *debug*: para publicar na Play Store, gere um build *release* assinado com a sua chave.
+
 ## Critérios de aceite
 
 | Critério | Como foi verificado |

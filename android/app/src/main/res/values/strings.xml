@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">QuestLog</string>
+    <string name="title_activity_main">QuestLog</string>
+    <string name="package_name">app.questlog.rpg</string>
+    <string name="custom_url_scheme">app.questlog.rpg</string>
+</resources>
