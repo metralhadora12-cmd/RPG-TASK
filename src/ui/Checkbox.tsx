@@ -5,7 +5,8 @@ const CHECK = ['.......##', '......##.', '##...##..', '.##.##...', '..###....', 
 
 export interface CheckboxProps {
   checked: boolean;
-  onChange: (checked: boolean) => void;
+  /** Recebe também o elemento clicado (útil para posicionar efeitos). */
+  onChange: (checked: boolean, element: HTMLElement) => void;
   label: string;
   className?: string;
 }
@@ -18,7 +19,7 @@ export function Checkbox({ checked, onChange, label, className }: CheckboxProps)
       role="checkbox"
       aria-checked={checked}
       aria-label={label}
-      onClick={() => onChange(!checked)}
+      onClick={(e) => onChange(!checked, e.currentTarget)}
       className={['px-check', className].filter(Boolean).join(' ')}
     >
       {checked ? <PixelIcon matrix={CHECK} colors={{ '#': palette.hpGreen }} scale={2} /> : null}

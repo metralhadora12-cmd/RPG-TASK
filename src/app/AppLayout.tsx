@@ -7,6 +7,8 @@ import { Window } from '@/ui/Window';
 import { ListsPanel } from '@/features/tasks/components/ListsPanel';
 import { useReminders } from '@/features/tasks/useReminders';
 import { Toasts } from '@/ui/Toasts';
+import { FloatingNumbers } from '@/features/progression/FloatingNumbers';
+import { LevelUpOverlay } from '@/features/progression/LevelUpOverlay';
 import { useMediaQuery } from '@/ui/useMediaQuery';
 import { Hud } from './Hud';
 import { mainNav } from './navigation';
@@ -101,6 +103,8 @@ export function AppLayout() {
       </div>
       <BottomTabs />
       <Toasts />
+      <FloatingNumbers />
+      <LevelUpOverlay />
     </div>
   );
 }

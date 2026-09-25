@@ -6,7 +6,8 @@ describe('migrate', () => {
   it('leva um save vazio da v0 à versão atual com todos os campos', () => {
     const state = migrate({}, 0);
     expect(state.settings).toEqual(defaultSettings);
-    expect(state.character).toBeNull();
+    expect(state.character).toMatchObject({ level: 1, xp: 0, gold: 0, name: '' });
+    expect(state.lifetime.tasksCompleted).toBe(0);
     expect(state.tasks).toEqual([]);
     expect(state.lists.map((l) => l.id)).toEqual(['inbox']);
     expect(state.viewPrefs).toEqual({});
@@ -27,6 +28,12 @@ describe('migrate', () => {
     expect(state.lists[0]!.name).toBe('Tarefas');
     const again = migrate({ ...state }, 1);
     expect(again.lists.filter((l) => l.id === 'inbox')).toHaveLength(1);
+  });
+
+  it('v2 → v3 cria o personagem padrão e preserva um existente', () => {
+    expect(migrate({ character: null }, 2).character.level).toBe(1);
+    const hero = { name: 'Aria', level: 7 };
+    expect(migrate({ character: hero }, 2).character).toBe(hero);
   });
 
   it('não altera um save que já está na versão atual', () => {

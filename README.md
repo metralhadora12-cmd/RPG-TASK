@@ -16,6 +16,15 @@ npm run preview    # serve o build
 
 ## Funcionalidades
 
+### Fase 3 — Progressão
+
+- Concluir uma missão dá **XP e Gold**. Os números flutuantes ("+20 XP", "+6 G", "CRÍTICO!") sobem a partir da caixa marcada, e o aviso mostra a recompensa com "Desfazer".
+- **Level up**: HP e MP cheios, +2 pontos de atributo e tela cheia com flash, "LEVEL UP!" e a tabela de ganhos (Nível, HP máx., MP máx., pontos). A tela fecha com Enter ou Esc.
+- **Desfazer é seguro**: reabrir uma missão, pelo aviso ou desmarcando a caixa, estorna exatamente XP, Gold, níveis, pontos e o HP/MP curado pelo level up. Também remove a próxima ocorrência ainda intocada de uma missão recorrente. Concluir e reabrir em sequência nunca gera recompensa extra.
+- **Log de recompensas** (`rewardLog`, últimos 500 eventos) e contadores vitalícios (`lifetime`: missões concluídas, XP e Gold ganhos, críticos).
+- **HUD** com nível, pontos a distribuir, barras de HP/MP/XP em degraus e Gold, que "pula" quando muda.
+- **Prévia da recompensa** no painel da missão, com os bônus que estão valendo.
+
 ### Fase 2 — Tarefas
 
 - **Listas inteligentes** na barra lateral, com contadores:
@@ -69,12 +78,50 @@ Para arrastar pelo teclado: foque a alça ⋮⋮, pressione Espaço, use as seta
 - **Mobile**: o cabeçalho tem um botão ◂ que abre a página de listas. Os detalhes abrem em tela cheia sobre a lista.
 - **/dev/ui**: vitrine dos componentes com troca de tema ao vivo.
 
-## Fórmulas (até agora)
+## Fórmulas
+
+Todas ficam em `src/features/progression/formulas.ts`, como funções puras (a aleatoriedade é injetada) cobertas por testes.
+
+### Recompensa base
+
+| Dificuldade | XP | Gold |
+|---|---|---|
+| Trivial | 5 | 1 |
+| Fácil | 10 | 3 |
+| Média | 20 | 6 |
+| Difícil | 40 | 12 |
+| Épica | 80 | 25 |
+
+### Modificadores (somados)
+
+```
+bônus  = passos + pontualidade + sequência
+XP     = round(base_xp   × (1 + bônus + classe_xp))
+Gold   = max(1, round(base_gold × (1 + bônus + classe_gold) × sorte × crítico))
+```
+
+| Modificador | Valor |
+|---|---|
+| Passos concluídos | +10% cada, máx. +50% |
+| Pontualidade (concluída até o dia do vencimento) | +20% |
+| Sequência (só diárias) | +2% por dia, máx. +40% |
+| Guerreiro | +15% XP em Difícil/Épica |
+| Mago | +10% XP |
+| Ladino | +20% Gold |
+| Clérigo | −30% nas penalidades de HP (Fase 5) |
+| Sorte | Gold × uniforme(0,85 – 1,15) |
+| Crítico | 5% de chance de Gold ×2 |
+
+Exemplo: missão Média com 2 passos feitos e no prazo → XP = 20 × (1 + 0,2 + 0,2) = 28.
+
+### Níveis
 
 | Fórmula | Definição |
 |---|---|
 | XP para o próximo nível | `round(25 · n^1.5 + 50)` (nível 1 → 75, nível 10 → 841) |
+| Nível máximo | 99 |
 | HP máximo | `50 + 5 · nível` |
 | MP máximo | `20 + 2 · nível` |
+| Pontos por nível | 2 |
 
-As fórmulas ficam em `src/features/progression/formulas.ts`, como funções puras com testes. Recompensas e modificadores entram na Fase 3.
+O progresso é guardado como nível + XP no nível. Para aplicar ou desfazer, ele é convertido em XP total acumulado. Assim, desfazer várias conclusões em qualquer ordem volta exatamente ao estado inicial, o que é testado como propriedade com sequências aleatórias.

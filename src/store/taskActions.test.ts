@@ -32,7 +32,7 @@ describe('ações de tarefas', () => {
 
   it('concluir e reabrir', () => {
     const id = store().addTask({ title: 'x' });
-    expect(store().completeTask(id)).toEqual({});
+    expect(store().completeTask(id).reward).toBeDefined();
     expect(task(id).completedAt).toBeDefined();
     // Concluir de novo não faz nada.
     expect(store().completeTask(id)).toEqual({});
@@ -81,6 +81,85 @@ describe('ações de tarefas', () => {
     expect(task(id).subtasks.map((s) => s.title)).toEqual(['Novo']);
     store().deleteSubtask(id, sub.id);
     expect(task(id).subtasks).toEqual([]);
+  });
+});
+
+describe('progressão ao concluir', () => {
+  const noLuck = () => 0.5; // Gold ×1,0 e sem crítico
+  const hero = () => store().character;
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 8, 25, 10, 0));
+    useGameStore.setState(initialPersistedState());
+  });
+  afterEach(() => vi.useRealTimers());
+
+  it('dá XP e Gold conforme dificuldade, passos e pontualidade', () => {
+    const id = store().addTask({ title: 'x', difficulty: 'medium', dueDate: '2026-09-25' });
+    store().addSubtask(id, 'a');
+    store().updateSubtask(id, task(id).subtasks[0]!.id, { done: true });
+    const { reward } = store().completeTask(id, { random: noLuck });
+    // 20 × (1 + 0,1 + 0,2) = 26 XP; 6 × 1,3 = 7,8 → 8 G
+    expect(reward).toMatchObject({ xp: 26, gold: 8, critical: false, levelsGained: 0 });
+    expect(hero()).toMatchObject({ xp: 26, gold: 8, level: 1 });
+    expect(store().lifetime).toMatchObject({ tasksCompleted: 1, xpEarned: 26, goldEarned: 8 });
+    expect(store().rewardLog).toHaveLength(1);
+  });
+
+  it('atrasada não ganha bônus de pontualidade', () => {
+    const id = store().addTask({ title: 'x', difficulty: 'medium', dueDate: '2026-09-24' });
+    expect(store().completeTask(id, { random: noLuck }).reward!.xp).toBe(20);
+  });
+
+  it('level up recupera HP e dá pontos; reabrir estorna tudo', () => {
+    useGameStore.setState({ character: { ...hero(), xp: 70, hp: 10 } });
+    const before = hero();
+    const id = store().addTask({ title: 'x', difficulty: 'epic' });
+    const { reward } = store().completeTask(id, { random: noLuck });
+    expect(reward).toMatchObject({ fromLevel: 1, toLevel: 2, levelsGained: 1, pointsGained: 2 });
+    expect(hero()).toMatchObject({ level: 2, hp: 60, unspentPoints: 2 });
+    store().uncompleteTask(id);
+    expect(hero()).toEqual(before);
+    expect(store().rewardLog[0]!.revertedAt).toBeDefined();
+    expect(store().lifetime.tasksCompleted).toBe(0);
+  });
+
+  it('concluir/reabrir repetidamente não gera XP/Gold (sem farm)', () => {
+    const id = store().addTask({ title: 'x', difficulty: 'hard' });
+    for (let i = 0; i < 10; i++) {
+      store().completeTask(id);
+      store().uncompleteTask(id);
+    }
+    expect(hero()).toMatchObject({ xp: 0, gold: 0, level: 1 });
+  });
+
+  it('desfazer várias conclusões em qualquer ordem volta ao estado inicial', () => {
+    const before = hero();
+    const ids = (['trivial', 'easy', 'medium', 'hard', 'epic', 'epic', 'hard'] as const).map((difficulty) =>
+      store().addTask({ title: difficulty, difficulty }),
+    );
+    for (const id of ids) store().completeTask(id);
+    expect(hero().level).toBeGreaterThan(1);
+    for (const id of [ids[3], ids[0], ids[6], ids[1], ids[5], ids[2], ids[4]]) store().uncompleteTask(id!);
+    expect(hero()).toEqual(before);
+  });
+
+  it('reabrir remove a próxima ocorrência intocada de uma recorrente', () => {
+    const id = store().addTask({ title: 'x', dueDate: '2026-09-25' });
+    store().updateTask(id, { recurrence: { type: 'daily' } });
+    const { spawnedId } = store().completeTask(id);
+    expect(task(spawnedId!)).toBeDefined();
+    store().uncompleteTask(id);
+    expect(store().tasks.map((t) => t.id)).toEqual([id]);
+  });
+
+  it('concluir tarefa já concluída não dá recompensa de novo', () => {
+    const id = store().addTask({ title: 'x' });
+    store().completeTask(id);
+    const gold = hero().gold;
+    expect(store().completeTask(id)).toEqual({});
+    expect(hero().gold).toBe(gold);
   });
 });
 

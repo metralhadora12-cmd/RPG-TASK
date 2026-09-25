@@ -71,7 +71,7 @@ export function TaskList({
     if (e.key === ' ') {
       e.preventDefault();
       const leaves = !task.completedAt;
-      commands.toggleComplete(task.id);
+      commands.toggleComplete(task.id, target);
       if (leaves) refocus(index);
       return;
     }
@@ -120,7 +120,7 @@ export function TaskList({
               sortable={canSort}
               list={showListName ? listById.get(task.listId) : undefined}
               hideMyDayBadge={hideMyDayBadge}
-              onToggleComplete={() => commands.toggleComplete(task.id)}
+              onToggleComplete={(el) => commands.toggleComplete(task.id, el)}
               onToggleImportant={() => toggleImportant(task.id)}
               openProps={{
                 ref,

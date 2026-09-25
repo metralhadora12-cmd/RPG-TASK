@@ -8,6 +8,7 @@ import { Checkbox } from '@/ui/Checkbox';
 import { ListIcon } from '@/ui/ListIcon';
 import { palette } from '@/ui/palette';
 import { Window } from '@/ui/Window';
+import { RewardPreview } from '@/features/progression/RewardPreview';
 import { difficulties } from '../constants';
 import { weekdayShort } from '../recurrence';
 import { useToday } from '../useToday';
@@ -148,7 +149,7 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
         <div className="flex items-start gap-2">
           <Checkbox
             checked={done}
-            onChange={() => commands.toggleComplete(task.id)}
+            onChange={(_, el) => commands.toggleComplete(task.id, el)}
             label={t(done ? 'tasks.uncomplete' : 'tasks.complete', { title: task.title })}
             className="mt-1"
           />
@@ -176,6 +177,8 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
             ✕
           </button>
         </div>
+
+        {!done ? <RewardPreview task={task} today={today} /> : null}
 
         <Field label={t('tasks.detail.steps')} htmlFor={ids.step}>
           <ul className="flex flex-col gap-1">

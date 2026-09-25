@@ -30,7 +30,7 @@ export interface TaskRowProps {
   /** Lista da tarefa, exibida nas listas inteligentes. */
   list?: TaskList;
   hideMyDayBadge?: boolean;
-  onToggleComplete: () => void;
+  onToggleComplete: (origin: HTMLElement) => void;
   onToggleImportant: () => void;
   openProps: HTMLAttributes<HTMLButtonElement> & { ref: Ref<HTMLButtonElement> };
 }
@@ -78,7 +78,7 @@ export function TaskRow({
       ) : null}
       <Checkbox
         checked={done}
-        onChange={onToggleComplete}
+        onChange={(_, el) => onToggleComplete(el)}
         label={t(done ? 'tasks.uncomplete' : 'tasks.complete', { title: task.title })}
       />
       <button type="button" className="task-open" aria-current={selected || undefined} {...openProps}>

@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { routes } from '@/app/router';
 import { initialPersistedState, useGameStore } from '@/store/useGameStore';
 import { useToastStore } from '@/ui/toastStore';
+import { useFxStore } from '@/features/progression/fxStore';
 
 function renderAt(path: string) {
   const router = createMemoryRouter(routes, { initialEntries: [path] });
@@ -20,6 +21,7 @@ describe('tela de missões', () => {
     vi.setSystemTime(new Date(2026, 8, 25, 10, 0));
     useGameStore.setState({ ...initialPersistedState(), hydrated: true });
     useToastStore.setState({ toasts: [] });
+    useFxStore.setState({ floats: [], levelUp: null });
   });
   afterEach(() => vi.useRealTimers());
 
@@ -41,9 +43,28 @@ describe('tela de missões', () => {
     renderAt('/missoes/meu-dia');
     await user.click(await screen.findByRole('checkbox', { name: 'Concluir "Coletar ervas"' }));
     expect(store().tasks[0]!.completedAt).toBeDefined();
-    expect(screen.getByText('Missão concluída!')).toBeInTheDocument();
+    const { xp, gold } = store().character;
+    expect(xp).toBe(10);
+    expect(gold).toBeGreaterThan(0);
+    expect(screen.getByText(`Missão concluída! +10 XP · +${gold} G`, { exact: false })).toBeInTheDocument();
+    expect(screen.getByRole('progressbar', { name: 'XP' })).toHaveAttribute('aria-valuenow', '10');
     await user.click(screen.getByRole('button', { name: 'Desfazer' }));
     expect(store().tasks[0]!.completedAt).toBeUndefined();
+    expect(store().character).toMatchObject({ xp: 0, gold: 0 });
+  });
+
+  it('level up abre a tela cheia com os ganhos e fecha com Continuar', async () => {
+    const user = userEvent.setup();
+    useGameStore.setState({ character: { ...store().character, xp: 70 } });
+    store().addTask({ title: 'Chefão', myDay: true, difficulty: 'epic' });
+    renderAt('/missoes/meu-dia');
+    await user.click(await screen.findByRole('checkbox', { name: 'Concluir "Chefão"' }));
+    const dialog = await screen.findByRole('dialog', { name: 'LEVEL UP!' });
+    expect(dialog).toHaveTextContent(/Nível\s*1▸2/);
+    expect(dialog).toHaveTextContent(/Pontos de atributo\s*▸\+2/);
+    expect(screen.getByText('+2 pts')).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: 'Continuar' }));
+    await vi.waitFor(() => expect(screen.queryByRole('dialog', { name: 'LEVEL UP!' })).not.toBeInTheDocument());
   });
 
   it('teclado: setas movem, Espaço conclui, S marca importante e Enter abre detalhes', async () => {

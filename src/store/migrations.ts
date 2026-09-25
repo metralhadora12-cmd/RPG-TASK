@@ -1,4 +1,5 @@
 import { defaultSettings } from './defaults';
+import { defaultCharacter, defaultLifetime } from '@/features/character/defaults';
 import { inboxList } from './listActions';
 import type { TaskList } from './types';
 import type { PersistedState } from './useGameStore';
@@ -7,7 +8,7 @@ import type { PersistedState } from './useGameStore';
  * Versão atual do estado persistido. Ao mudar o formato do estado:
  * incremente, adicione um passo em `steps` e um teste em `migrations.test.ts`.
  */
-export const STORE_VERSION = 2;
+export const STORE_VERSION = 3;
 
 type Step = (state: Record<string, unknown>) => Record<string, unknown>;
 
@@ -33,6 +34,12 @@ const steps: Record<number, Step> = {
       lists: lists.some((l) => l.id === inbox.id) ? lists : [inbox, ...lists],
     };
   },
+  // v2 → v3: personagem sempre presente (progressão) e contadores vitalícios.
+  2: (state) => ({
+    ...state,
+    character: state.character ?? defaultCharacter(),
+    lifetime: { ...defaultLifetime(), ...(state.lifetime as object | undefined) },
+  }),
 };
 
 export function migrate(persisted: unknown, fromVersion: number): PersistedState {

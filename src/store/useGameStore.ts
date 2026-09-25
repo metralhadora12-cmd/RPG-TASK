@@ -5,17 +5,19 @@ import { createListActions, inboxList, type ListActions } from './listActions';
 import { migrate, STORE_VERSION } from './migrations';
 import { idbStorage } from './storage';
 import { createTaskActions, type TaskActions } from './taskActions';
-import type { Character, ListGroup, RewardEvent, Settings, SortMode, Task, TaskList } from './types';
+import { defaultCharacter, defaultLifetime } from '@/features/character/defaults';
+import type { Character, LifetimeStats, ListGroup, RewardEvent, Settings, SortMode, Task, TaskList } from './types';
 
 export const STORE_KEY = 'questlog-save';
 
 export interface PersistedState {
   settings: Settings;
-  character: Character | null;
+  character: Character;
   lists: TaskList[];
   groups: ListGroup[];
   tasks: Task[];
   rewardLog: RewardEvent[];
+  lifetime: LifetimeStats;
   /** Ordenação escolhida por visão ("my-day", "list:<id>", ...). */
   viewPrefs: Record<string, SortMode>;
 }
@@ -33,11 +35,12 @@ export type StoreGet = () => GameState;
 export function initialPersistedState(): PersistedState {
   return {
     settings: { ...defaultSettings },
-    character: null,
+    character: defaultCharacter(),
     lists: [inboxList()],
     groups: [],
     tasks: [],
     rewardLog: [],
+    lifetime: defaultLifetime(),
     viewPrefs: {},
   };
 }
@@ -62,13 +65,14 @@ export const useGameStore = create<GameState>()(
       version: STORE_VERSION,
       storage: createJSONStorage(() => idbStorage),
       migrate,
-      partialize: ({ settings, character, lists, groups, tasks, rewardLog, viewPrefs }): PersistedState => ({
+      partialize: ({ settings, character, lists, groups, tasks, rewardLog, lifetime, viewPrefs }): PersistedState => ({
         settings,
         character,
         lists,
         groups,
         tasks,
         rewardLog,
+        lifetime,
         viewPrefs,
       }),
       merge: (persisted, current) => {

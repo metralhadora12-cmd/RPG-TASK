@@ -1,8 +1,9 @@
 import { INBOX_LIST_ID } from '@/features/tasks/constants';
 import { nextOccurrence, shiftDateTime } from '@/features/tasks/recurrence';
+import { applyReward, computeReward, revertReward, type ProgressState } from '@/features/progression/formulas';
 import { gameDayKey } from '@/lib/date';
 import { createId } from '@/lib/id';
-import type { Difficulty, Subtask, Task, TaskKind } from './types';
+import type { Character, Difficulty, RewardEvent, Subtask, Task, TaskKind } from './types';
 import type { GameState, StoreGet, StoreSet } from './useGameStore';
 
 export interface NewTaskInput {
@@ -19,14 +20,35 @@ export interface CompleteResult {
   /** Id da próxima ocorrência criada por uma tarefa recorrente. */
   spawnedId?: string;
   spawnedDueDate?: string;
+  /** Recompensa aplicada (ausente se a tarefa não existia ou já estava concluída). */
+  reward?: {
+    eventId: string;
+    xp: number;
+    gold: number;
+    critical: boolean;
+    levelsGained: number;
+    fromLevel: number;
+    toLevel: number;
+    pointsGained: number;
+  };
 }
+
+export interface CompleteOptions {
+  /** Gerador aleatório (injete nos testes). */
+  random?: () => number;
+}
+
+/** Mantém o log de recompensas com tamanho limitado. */
+export const REWARD_LOG_LIMIT = 500;
 
 export interface TaskActions {
   addTask: (input: NewTaskInput) => string;
   updateTask: (id: string, patch: Partial<Omit<Task, 'id' | 'createdAt'>>) => void;
   deleteTask: (id: string) => Task | undefined;
   restoreTask: (task: Task) => void;
-  completeTask: (id: string) => CompleteResult;
+  /** Conclui e aplica XP/Gold (com level up). */
+  completeTask: (id: string, options?: CompleteOptions) => CompleteResult;
+  /** Reabre e estorna a recompensa da conclusão (e remove a próxima ocorrência ainda pendente). */
   uncompleteTask: (id: string) => void;
   toggleImportant: (id: string) => void;
   toggleMyDay: (id: string) => void;
@@ -36,6 +58,10 @@ export interface TaskActions {
   addSubtask: (taskId: string, title: string) => void;
   updateSubtask: (taskId: string, subtaskId: string, patch: Partial<Omit<Subtask, 'id'>>) => void;
   deleteSubtask: (taskId: string, subtaskId: string) => void;
+}
+
+function progressOf(c: Character): ProgressState {
+  return { level: c.level, xp: c.xp, hp: c.hp, mp: c.mp, gold: c.gold, unspentPoints: c.unspentPoints };
 }
 
 export function today(get: StoreGet): string {
@@ -94,14 +120,16 @@ export function createTaskActions(set: StoreSet, get: StoreGet): TaskActions {
         return { tasks: [...s.tasks.filter((t) => t.id !== task.id), restored] };
       }),
 
-    completeTask: (id) => {
-      const task = get().tasks.find((t) => t.id === id);
+    completeTask: (id, options = {}) => {
+      const state = get();
+      const task = state.tasks.find((t) => t.id === id);
       if (!task || task.completedAt) return {};
       const now = new Date().toISOString();
+      const day = today(get);
       const result: CompleteResult = {};
+
       let spawned: Task | undefined;
       if (task.recurrence && task.kind === 'todo') {
-        const day = today(get);
         const fromDue = task.dueDate ?? day;
         const nextDue = nextOccurrence(fromDue, task.recurrence, day);
         spawned = {
@@ -119,16 +147,99 @@ export function createTaskActions(set: StoreSet, get: StoreGet): TaskActions {
         result.spawnedId = spawned.id;
         result.spawnedDueDate = nextDue;
       }
+
+      const character = state.character;
+      const reward = computeReward({
+        difficulty: task.difficulty,
+        subtasksDone: task.subtasks.filter((st) => st.done).length,
+        onTime: Boolean(task.dueDate && day <= task.dueDate),
+        streak: task.kind === 'daily' ? task.streak : 0,
+        classId: character.classId,
+        random: options.random ?? Math.random,
+      });
+      const applied = applyReward(progressOf(character), reward.xp, reward.gold);
+      const event: RewardEvent = {
+        id: createId(),
+        taskId: id,
+        kind: 'complete',
+        xp: applied.delta.xp,
+        gold: applied.delta.gold,
+        hp: applied.delta.hpHealed,
+        at: now,
+        critical: reward.critical,
+        levelsGained: applied.delta.levelsGained,
+        hpHealed: applied.delta.hpHealed,
+        mpHealed: applied.delta.mpHealed,
+        pointsGained: applied.delta.pointsGained,
+        spawnedTaskId: spawned?.id,
+      };
+      result.reward = {
+        eventId: event.id,
+        xp: event.xp,
+        gold: event.gold,
+        critical: reward.critical,
+        levelsGained: applied.delta.levelsGained,
+        fromLevel: character.level,
+        toLevel: applied.state.level,
+        pointsGained: applied.delta.pointsGained,
+      };
+
       set((s) => ({
         tasks: [
           ...s.tasks.map((t) => (t.id === id ? { ...t, completedAt: now, updatedAt: now } : t)),
           ...(spawned ? [spawned] : []),
         ],
+        character: { ...s.character, ...applied.state },
+        rewardLog: [...s.rewardLog, event].slice(-REWARD_LOG_LIMIT),
+        lifetime: {
+          ...s.lifetime,
+          tasksCompleted: s.lifetime.tasksCompleted + 1,
+          xpEarned: s.lifetime.xpEarned + event.xp,
+          goldEarned: s.lifetime.goldEarned + event.gold,
+          criticals: s.lifetime.criticals + (reward.critical ? 1 : 0),
+        },
       }));
       return result;
     },
 
-    uncompleteTask: (id) => patchTask(id, () => ({ completedAt: undefined })),
+    uncompleteTask: (id) => {
+      const state = get();
+      const task = state.tasks.find((t) => t.id === id);
+      if (!task?.completedAt) return;
+      const now = new Date().toISOString();
+      const event = [...state.rewardLog].reverse().find((e) => e.kind === 'complete' && e.taskId === id && !e.revertedAt);
+      const spawned = event?.spawnedTaskId ? state.tasks.find((t) => t.id === event.spawnedTaskId) : undefined;
+      // A próxima ocorrência só some se ninguém mexeu nela ainda.
+      const dropSpawned = spawned && !spawned.completedAt;
+      set((s) => ({
+        tasks: s.tasks
+          .filter((t) => !(dropSpawned && t.id === spawned.id))
+          .map((t) => (t.id === id ? { ...t, completedAt: undefined, updatedAt: now } : t)),
+        ...(event
+          ? {
+              character: {
+                ...s.character,
+                ...revertReward(progressOf(s.character), {
+                  xp: event.xp,
+                  gold: event.gold,
+                  levelsGained: event.levelsGained ?? 0,
+                  hpHealed: event.hpHealed ?? 0,
+                  mpHealed: event.mpHealed ?? 0,
+                  pointsGained: event.pointsGained ?? 0,
+                }),
+              },
+              rewardLog: s.rewardLog.map((e) => (e.id === event.id ? { ...e, revertedAt: now } : e)),
+              lifetime: {
+                ...s.lifetime,
+                tasksCompleted: Math.max(0, s.lifetime.tasksCompleted - 1),
+                xpEarned: Math.max(0, s.lifetime.xpEarned - event.xp),
+                goldEarned: Math.max(0, s.lifetime.goldEarned - event.gold),
+                criticals: Math.max(0, s.lifetime.criticals - (event.critical ? 1 : 0)),
+              },
+            }
+          : {}),
+      }));
+    },
 
     toggleImportant: (id) => patchTask(id, (t) => ({ important: !t.important })),
 

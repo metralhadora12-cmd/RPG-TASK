@@ -107,13 +107,30 @@ export interface Character {
 export interface RewardEvent {
   id: string;
   taskId?: string;
-  kind: 'complete' | 'undo' | 'habitUp' | 'habitDown' | 'dailyMissed' | 'purchase' | 'faint' | 'potion';
+  kind: 'complete' | 'habitUp' | 'habitDown' | 'dailyMissed' | 'purchase' | 'faint' | 'potion';
+  /** Variações efetivamente aplicadas (negativas para perdas). */
   xp: number;
   gold: number;
   hp: number;
   at: string;
-  /** Id do evento revertido (para `undo`). */
-  reverts?: string;
+  critical?: boolean;
+  levelsGained?: number;
+  hpHealed?: number;
+  mpHealed?: number;
+  pointsGained?: number;
+  /** Próxima ocorrência criada ao concluir uma tarefa recorrente. */
+  spawnedTaskId?: string;
+  /** Preenchido quando o evento foi desfeito. */
+  revertedAt?: string;
+}
+
+/** Contadores vitalícios para a tela de status. */
+export interface LifetimeStats {
+  tasksCompleted: number;
+  xpEarned: number;
+  goldEarned: number;
+  criticals: number;
+  bestStreak: number;
 }
 
 export type ReducedMotionPref = 'system' | 'on' | 'off';
