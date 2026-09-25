@@ -3,32 +3,12 @@ import type { ReactNode } from 'react';
 import { maxHp, maxMp, xpToNextLevel } from '@/features/progression/formulas';
 import { t } from '@/lib/i18n';
 import { useGameStore } from '@/store/useGameStore';
+import { Link } from 'react-router-dom';
+import { CharacterSprite } from '@/sprites/CharacterSprite';
 import { Bar } from '@/ui/Bar';
 import { palette } from '@/ui/palette';
 import { PixelIcon } from '@/ui/PixelIcon';
 import { useReducedMotion } from '@/ui/useReducedMotion';
-
-// Retrato provisório (a fase 4 troca pelo sprite do personagem).
-const PORTRAIT = [
-  '...######...',
-  '..#GGGGGG#..',
-  '.#GGGGGGGG#.',
-  '.#GSSSSSSG#.',
-  '.#SSKSSKSS#.',
-  '.#SSSSSSSS#.',
-  '..#SSMMSS#..',
-  '...#SSSS#...',
-  '..#BBBBBB#..',
-  '.#BBBBBBBB#.',
-] as const;
-const PORTRAIT_COLORS = {
-  '#': palette.ink,
-  G: palette.gray,
-  S: '#f0b890',
-  K: palette.ink,
-  M: '#c06050',
-  B: palette.sky,
-};
 
 const COIN = ['.###.', '#YYW#', '#YWY#', '#YYY#', '.###.'] as const;
 const COIN_COLORS = { '#': '#8a5a00', Y: palette.gold, W: palette.white };
@@ -57,7 +37,9 @@ export function Hud() {
   return (
     <header className="win sticky top-0 z-30 rounded-none px-3 py-2 sm:px-4">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-1">
-        <PixelIcon matrix={PORTRAIT} colors={PORTRAIT_COLORS} scale={4} className="shrink-0" />
+        <Link to="/personagem" aria-label={t('nav.character')} className="shrink-0 rounded focus-visible:outline-2 focus-visible:outline-(--win-accent)">
+          <CharacterSprite look={character} scale={3} crop={{ x: [5, 27], y: [1, 20] }} />
+        </Link>
         <div className="min-w-[7rem]">
           <p className="font-title truncate text-[0.7rem] text-shadow-pixel">{character.name || t('hud.noHero')}</p>
           <p className="text-win-accent text-shadow-pixel" aria-live="polite">

@@ -16,6 +16,36 @@ npm run preview    # serve o build
 
 ## Funcionalidades
 
+### Fase 4 — Personagem
+
+- **Sprites procedurais em camadas** (`src/sprites/`). Cada parte é uma matriz 32×32 de chaves de paleta, escrita como texto em `layerData.ts`. Camadas simétricas guardam só a metade esquerda, que é espelhada em tempo de execução.
+  - O `compose.ts` junta as camadas em ordem fixa: fundo/capa → cabelo de trás → corpo → roupa → rosto → cabelo → chapéu → braços → arma → acessório → mascote.
+  - Cada camada tem a própria paleta, então recolorir é só trocar a paleta.
+  - O resultado é desenhado em `<canvas>` com `imageSmoothingEnabled = false` e escala inteira.
+- **Poses**:
+  - parado, com 2 quadros de respiração (a cabeça desce 1px);
+  - vitória, com o braço erguido;
+  - desmaiado, com o sprite girado e apoiado no chão e os olhos fechados.
+- **Silhuetas**: esguia, ou robusta, que alarga o tronco em 2px e afasta as pernas por transformação procedural, sem arte duplicada.
+- **Criação de personagem** (obrigatória no primeiro acesso, em `/criar`):
+  - menu de JRPG com prévia ao vivo;
+  - nome (até 12 letras), classe com descrição, bônus e atributos iniciais;
+  - corpo (2), pele (8), cabelo (10 estilos × 12 cores), olhos (6) e roupa (3 por classe);
+  - botão **Aleatório** com d20 que gira e o herói comemora;
+  - teclado: ↑/↓ entre opções, ←/→ muda o valor, Enter confirma.
+- **Aparência** (`/personagem/aparencia`): nome, cabelo e cores mudam de graça. A classe só muda a partir do nível 10, por **Reencarnação** (com confirmação): mantém nível, XP e Gold, volta aos atributos da nova classe e libera todos os pontos para redistribuir.
+- **Status** (`/personagem`): sprite com seletor de pose, barras, atributos FOR/INT/AGI/VIT com distribuição de pontos pelo teclado e estatísticas vitalícias.
+- **HUD** com o busto do herói animado (link para o Status).
+- **Visualizador** `/dev/sprites`: todas as combinações de cabelo, cor, pele, olhos e roupas, em qualquer pose, silhueta e escala.
+- **Desfazer seguro com atributos**: se um level up for desfeito depois que os pontos já foram distribuídos, os pontos saem do atributo mais alto acima da base da classe.
+
+| Classe | FOR | INT | AGI | VIT | Bônus |
+|---|---|---|---|---|---|
+| Guerreiro | 8 | 3 | 5 | 6 | +15% XP em Difícil/Épica |
+| Mago | 3 | 8 | 5 | 6 | +10% XP |
+| Ladino | 5 | 4 | 8 | 5 | +20% Gold |
+| Clérigo | 5 | 5 | 4 | 8 | −30% nas penalidades de HP |
+
 ### Fase 3 — Progressão
 
 - Concluir uma missão dá **XP e Gold**. Os números flutuantes ("+20 XP", "+6 G", "CRÍTICO!") sobem a partir da caixa marcada, e o aviso mostra a recompensa com "Desfazer".
@@ -69,6 +99,8 @@ Para arrastar pelo teclado: foque a alça ⋮⋮, pressione Espaço, use as seta
 
 ### Telas (descrição)
 
+- **Criação de personagem**: à esquerda, a prévia no "palco" e a janela da classe (descrição, bônus, atributos iniciais); à direita, o menu com a mãozinha, cada opção com ◂ ▸, amostra de cor e o d20 roxo.
+- **Status**: o herói em escala ×6 com botões Parado/Vitória/Desmaiado, barras e, ao lado, Atributos, Estatísticas e Conquistas.
 - **Meu Dia (desktop)**:
   - no topo, o HUD azul;
   - à esquerda, o menu principal e o painel de listas (busca, listas inteligentes com contadores, listas do usuário);

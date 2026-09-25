@@ -1,4 +1,5 @@
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useGameStore } from '@/store/useGameStore';
 import { t } from '@/lib/i18n';
 import { CursorSlot } from '@/ui/Cursor';
 import { PixelIcon } from '@/ui/PixelIcon';
@@ -76,7 +77,10 @@ export function AppLayout() {
   const { pathname } = useLocation();
   const wide = useMediaQuery('(min-width: 768px)');
   const inQuests = wide && pathname.startsWith('/missoes');
+  const needsHero = useGameStore((s) => !s.character.name);
   useReminders();
+  // Primeiro acesso: criação de personagem obrigatória (o /dev fica liberado).
+  if (needsHero && !pathname.startsWith('/dev')) return <Navigate to="/criar" replace />;
   return (
     <div className="flex min-h-screen flex-col">
       <a

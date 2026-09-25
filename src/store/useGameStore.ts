@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { defaultSettings } from './defaults';
+import { createCharacterActions, type CharacterActions } from './characterActions';
 import { createListActions, inboxList, type ListActions } from './listActions';
 import { migrate, STORE_VERSION } from './migrations';
 import { idbStorage } from './storage';
@@ -22,7 +23,7 @@ export interface PersistedState {
   viewPrefs: Record<string, SortMode>;
 }
 
-export interface GameState extends PersistedState, TaskActions, ListActions {
+export interface GameState extends PersistedState, TaskActions, ListActions, CharacterActions {
   /** Verdadeiro após carregar o save do IndexedDB. */
   hydrated: boolean;
   updateSettings: (patch: Partial<Settings>) => void;
@@ -52,6 +53,7 @@ export const useGameStore = create<GameState>()(
       hydrated: false,
       ...createTaskActions(set, get),
       ...createListActions(set, get),
+      ...createCharacterActions(set, get),
       updateSettings: (patch) => set((s) => ({ settings: { ...s.settings, ...patch } })),
       resetProgress: () =>
         set((s) => ({

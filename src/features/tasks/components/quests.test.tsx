@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { routes } from '@/app/router';
-import { initialPersistedState, useGameStore } from '@/store/useGameStore';
+import { useGameStore } from '@/store/useGameStore';
+import { heroState } from '@/test/state';
 import { useToastStore } from '@/ui/toastStore';
 import { useFxStore } from '@/features/progression/fxStore';
 
@@ -19,7 +20,7 @@ describe('tela de missões', () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date(2026, 8, 25, 10, 0));
-    useGameStore.setState({ ...initialPersistedState(), hydrated: true });
+    useGameStore.setState(heroState());
     useToastStore.setState({ toasts: [] });
     useFxStore.setState({ floats: [], levelUp: null });
   });

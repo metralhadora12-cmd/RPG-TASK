@@ -1,6 +1,8 @@
 import { INBOX_LIST_ID } from '@/features/tasks/constants';
 import { nextOccurrence, shiftDateTime } from '@/features/tasks/recurrence';
-import { applyReward, computeReward, revertReward, type ProgressState } from '@/features/progression/formulas';
+import { removeAllocated } from '@/features/character/stats';
+import { applyReward, computeReward, POINTS_PER_LEVEL, revertReward, type ProgressState } from '@/features/progression/formulas';
+import { classBaseStats } from '@/sprites/characterParts';
 import { gameDayKey } from '@/lib/date';
 import { createId } from '@/lib/id';
 import type { Character, Difficulty, RewardEvent, Subtask, Task, TaskKind } from './types';
@@ -58,6 +60,25 @@ export interface TaskActions {
   addSubtask: (taskId: string, title: string) => void;
   updateSubtask: (taskId: string, subtaskId: string, patch: Partial<Omit<Subtask, 'id'>>) => void;
   deleteSubtask: (taskId: string, subtaskId: string) => void;
+}
+
+/** Estorna um evento de conclusão no personagem, inclusive pontos já distribuídos. */
+function revertOnCharacter(c: Character, event: RewardEvent): Character {
+  const reverted = revertReward(progressOf(c), {
+    xp: event.xp,
+    gold: event.gold,
+    levelsGained: event.levelsGained ?? 0,
+    hpHealed: event.hpHealed ?? 0,
+    mpHealed: event.mpHealed ?? 0,
+    pointsGained: event.pointsGained ?? 0,
+  });
+  const pointsLost = (c.level - reverted.level) * POINTS_PER_LEVEL;
+  const shortfall = Math.max(0, pointsLost - c.unspentPoints);
+  return {
+    ...c,
+    ...reverted,
+    stats: shortfall > 0 ? removeAllocated(c.stats, classBaseStats[c.classId], shortfall) : c.stats,
+  };
 }
 
 function progressOf(c: Character): ProgressState {
@@ -217,17 +238,7 @@ export function createTaskActions(set: StoreSet, get: StoreGet): TaskActions {
           .map((t) => (t.id === id ? { ...t, completedAt: undefined, updatedAt: now } : t)),
         ...(event
           ? {
-              character: {
-                ...s.character,
-                ...revertReward(progressOf(s.character), {
-                  xp: event.xp,
-                  gold: event.gold,
-                  levelsGained: event.levelsGained ?? 0,
-                  hpHealed: event.hpHealed ?? 0,
-                  mpHealed: event.mpHealed ?? 0,
-                  pointsGained: event.pointsGained ?? 0,
-                }),
-              },
+              character: revertOnCharacter(s.character, event),
               rewardLog: s.rewardLog.map((e) => (e.id === event.id ? { ...e, revertedAt: now } : e)),
               lifetime: {
                 ...s.lifetime,

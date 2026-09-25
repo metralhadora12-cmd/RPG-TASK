@@ -1,5 +1,6 @@
 import { maxHp, maxMp } from '@/features/progression/formulas';
 import { gameDayKey } from '@/lib/date';
+import { classBaseStats } from '@/sprites/characterParts';
 import type { Character, LifetimeStats } from '@/store/types';
 
 /** Personagem inicial (ainda sem nome — a criação de personagem preenche). */
@@ -13,7 +14,7 @@ export function defaultCharacter(): Character {
     hp: maxHp(1),
     mp: maxMp(1),
     gold: 0,
-    stats: { str: 5, int: 5, agi: 5, vit: 5 },
+    stats: { ...classBaseStats.warrior },
     unspentPoints: 0,
     equipped: {},
     inventory: [],

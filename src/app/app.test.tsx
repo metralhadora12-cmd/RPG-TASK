@@ -2,7 +2,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { initialPersistedState, useGameStore } from '@/store/useGameStore';
+import { useGameStore } from '@/store/useGameStore';
+import { heroState } from '@/test/state';
 import { routes } from './router';
 import { SettingsEffects } from './SettingsEffects';
 
@@ -19,7 +20,7 @@ function renderAt(path: string) {
 
 describe('App', () => {
   beforeEach(() => {
-    useGameStore.setState({ ...initialPersistedState(), hydrated: true });
+    useGameStore.setState(heroState());
   });
 
   it('redireciona / para Missões e mostra HUD e navegação', async () => {
