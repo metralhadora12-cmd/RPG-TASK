@@ -73,3 +73,35 @@ export function describeRecurrence(rule: Recurrence): string {
       return t('tasks.recurrence.everyNDays.desc', { n: rule.interval });
   }
 }
+
+/**
+ * Diz se uma rotina com a regra `rule` "vale" no dia `day`. `anchor` é o dia
+ * de início (data de referência para mensal, anual e a cada N dias).
+ */
+export function isDueOn(rule: Recurrence, anchor: string, day: string): boolean {
+  if (day < anchor) return false;
+  const d = parseISO(day);
+  const a = parseISO(anchor);
+  switch (rule.type) {
+    case 'daily':
+      return true;
+    case 'weekdays':
+      return getDay(d) !== 0 && getDay(d) !== 6;
+    case 'weekly':
+      return rule.days.length ? rule.days.includes(getDay(d) as Weekday) : getDay(d) === getDay(a);
+    case 'monthly': {
+      // Âncora no dia 31 vale no último dia dos meses mais curtos.
+      const lastOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+      return d.getDate() === Math.min(a.getDate(), lastOfMonth);
+    }
+    case 'yearly': {
+      if (d.getMonth() !== a.getMonth()) return false;
+      const lastOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+      return d.getDate() === Math.min(a.getDate(), lastOfMonth);
+    }
+    case 'everyNDays': {
+      const diff = Math.round((d.getTime() - a.getTime()) / 86_400_000);
+      return diff % Math.max(1, Math.floor(rule.interval)) === 0;
+    }
+  }
+}

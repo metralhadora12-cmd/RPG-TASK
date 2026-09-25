@@ -10,6 +10,7 @@ import { ListIcon } from '@/ui/ListIcon';
 import { palette } from '@/ui/palette';
 import { PixelIcon } from '@/ui/PixelIcon';
 import { describeRecurrence } from '../recurrence';
+import { isDailyDue } from '../dayCycle';
 import { isInMyDay, isOverdue } from '../selectors';
 import { DifficultyPips } from './DifficultyPips';
 
@@ -53,7 +54,7 @@ export function TaskRow({
   });
   const done = Boolean(task.completedAt);
   const stepsDone = task.subtasks.filter((s) => s.done).length;
-  const overdue = isOverdue(task, today);
+  const overdue = task.kind === 'todo' && isOverdue(task, today);
 
   return (
     <li
@@ -98,7 +99,15 @@ export function TaskRow({
               {t('tasks.inMyDay')}
             </span>
           ) : null}
-          {task.dueDate ? (
+          {task.kind === 'daily' ? (
+            <>
+              <span className={isDailyDue(task, today) ? 'px-chip text-win-text' : 'opacity-70'}>
+                {isDailyDue(task, today) ? t('tasks.dailies.dueToday') : t('tasks.dailies.notDue')}
+              </span>
+              {task.streak > 0 ? <span className="text-win-accent">★ {t('tasks.streak', { n: task.streak })}</span> : null}
+            </>
+          ) : null}
+          {task.dueDate && task.kind === 'todo' ? (
             <span
               className={overdue ? 'px-chip text-win-text' : undefined}
               style={overdue ? { borderColor: palette.hpRed } : undefined}

@@ -3,7 +3,29 @@ import { formatDay } from '@/lib/date';
 import { t } from '@/lib/i18n';
 import { useGameStore } from '@/store/useGameStore';
 import { showToast } from '@/ui/toastStore';
-import { showLevelUp, spawnFloats } from '@/features/progression/fxStore';
+import { hitScreen, originOf, showLevelUp, spawnFloats } from '@/features/progression/fxStore';
+
+interface RewardFx {
+  xp: number;
+  gold: number;
+  critical: boolean;
+  levelsGained: number;
+  fromLevel: number;
+  toLevel: number;
+  pointsGained: number;
+}
+
+/** Números flutuantes de XP/Gold (e crítico) + tela de level up. */
+function celebrate(reward: RewardFx, origin?: Element | null) {
+  spawnFloats(originOf(origin), [
+    ...(reward.critical ? [{ kind: 'critical' as const, text: t('progress.critical') }] : []),
+    { kind: 'xp', text: t('progress.xp', { n: reward.xp }) },
+    { kind: 'gold', text: t('progress.gold', { n: reward.gold }) },
+  ]);
+  if (reward.levelsGained > 0) {
+    showLevelUp({ fromLevel: reward.fromLevel, toLevel: reward.toLevel, pointsGained: reward.pointsGained });
+  }
+}
 
 /**
  * Ações de tarefa com feedback para o jogador (toasts com "Desfazer").
@@ -26,18 +48,7 @@ export function useTaskCommands() {
         const { spawnedDueDate, reward } = store.completeTask(id);
         if (!reward) return;
 
-        const rect = origin?.getBoundingClientRect();
-        const point = rect
-          ? { x: rect.left + rect.width / 2, y: rect.top }
-          : { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-        spawnFloats(point, [
-          ...(reward.critical ? [{ kind: 'critical' as const, text: t('progress.critical') }] : []),
-          { kind: 'xp', text: t('progress.xp', { n: reward.xp }) },
-          { kind: 'gold', text: t('progress.gold', { n: reward.gold }) },
-        ]);
-        if (reward.levelsGained > 0) {
-          showLevelUp({ fromLevel: reward.fromLevel, toLevel: reward.toLevel, pointsGained: reward.pointsGained });
-        }
+        celebrate(reward, origin);
 
         const rewardText = t(reward.critical ? 'progress.rewardToastCritical' : 'progress.rewardToast', {
           xp: reward.xp,
@@ -50,6 +61,34 @@ export function useTaskCommands() {
           actionLabel: t('tasks.undo'),
           // Reabrir estorna XP/Gold e remove a próxima ocorrência intocada.
           onAction: () => useGameStore.getState().uncompleteTask(id),
+        });
+      },
+
+      habitUp(id: string, origin?: Element | null) {
+        const reward = useGameStore.getState().habitUp(id);
+        if (!reward) return;
+        celebrate(reward, origin);
+        showToast({
+          message: t('progress.habitUpToast', { xp: reward.xp, gold: reward.gold }),
+          actionLabel: t('tasks.undo'),
+          onAction: () => useGameStore.getState().revertHabit(reward.eventId),
+        });
+      },
+
+      habitDown(id: string, origin?: Element | null) {
+        const result = useGameStore.getState().habitDown(id);
+        if (!result) return;
+        if (result.hpLost > 0) {
+          spawnFloats(originOf(origin), [{ kind: 'damage', text: t('progress.hp', { n: result.hpLost }) }]);
+          hitScreen();
+        }
+        // Desmaio abre a tela de Game Over e não pode ser desfeito.
+        if (result.faint) return;
+        showToast({
+          message:
+            result.hpLost > 0 ? t('progress.habitDownToast', { n: result.hpLost }) : t('progress.habitDownNoDamage'),
+          actionLabel: t('tasks.undo'),
+          onAction: () => useGameStore.getState().revertHabit(result.eventId),
         });
       },
 

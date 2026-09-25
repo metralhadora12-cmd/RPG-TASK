@@ -25,10 +25,12 @@ export const difficultyColor: Record<Difficulty, string> = {
 export const sortModes: SortMode[] = ['manual', 'dueDate', 'importance', 'difficulty', 'alpha'];
 
 /** Listas inteligentes (fixas) e o trecho de URL de cada uma. */
-export type SmartViewId = 'my-day' | 'important' | 'planned' | 'all' | 'completed';
+export type SmartViewId = 'my-day' | 'dailies' | 'habits' | 'important' | 'planned' | 'all' | 'completed';
 
 export const smartViews: { id: SmartViewId; slug: string; label: MessageKey; icon: string }[] = [
   { id: 'my-day', slug: 'meu-dia', label: 'tasks.view.myDay', icon: 'sun' },
+  { id: 'dailies', slug: 'rotinas', label: 'tasks.view.dailies', icon: 'flag' },
+  { id: 'habits', slug: 'habitos', label: 'tasks.view.habits', icon: 'heart' },
   { id: 'important', slug: 'importante', label: 'tasks.view.important', icon: 'star' },
   { id: 'planned', slug: 'planejado', label: 'tasks.view.planned', icon: 'calendar' },
   { id: 'all', slug: 'todas', label: 'tasks.view.all', icon: 'scroll' },

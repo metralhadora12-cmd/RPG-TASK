@@ -20,6 +20,8 @@ import { ListEditDialog } from './ListEditDialog';
 
 const smartColors: Record<SmartViewId, string> = {
   'my-day': palette.gold,
+  dailies: palette.sky,
+  habits: palette.hpRed,
   important: palette.hpYellow,
   planned: palette.sky,
   all: palette.frost,

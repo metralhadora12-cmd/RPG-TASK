@@ -3,6 +3,7 @@ import type { Locale } from '@/lib/i18n';
 
 export type Difficulty = 'trivial' | 'easy' | 'medium' | 'hard' | 'epic';
 export type TaskKind = 'todo' | 'daily' | 'habit';
+export type HabitDirection = 'both' | 'up' | 'down';
 export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export type Recurrence =
@@ -41,6 +42,8 @@ export interface Task {
   completedAt?: string;
   streak: number;
   habitCounts?: { up: number; down: number; date: string };
+  /** Hábitos: quais botões aparecem (+, − ou ambos). */
+  habitDirection?: HabitDirection;
   order: number;
   createdAt: string;
   updatedAt: string;
@@ -120,8 +123,31 @@ export interface RewardEvent {
   pointsGained?: number;
   /** Próxima ocorrência criada ao concluir uma tarefa recorrente. */
   spawnedTaskId?: string;
+  /** Sequência da rotina antes da conclusão (para desfazer). */
+  streakBefore?: number;
+  /** Evento irreversível (ex.: desmaio no meio). */
+  final?: boolean;
   /** Preenchido quando o evento foi desfeito. */
   revertedAt?: string;
+}
+
+/** Resultado do fechamento de um dia ("Relatório da noite"). */
+export interface NightReport {
+  /** Último dia fechado (yyyy-MM-dd). */
+  day: string;
+  missed: { title: string; difficulty: Difficulty; damage: number }[];
+  completed: string[];
+  streaksLost: { title: string; streak: number }[];
+  hpLost: number;
+  penaltiesEnabled: boolean;
+  faint: FaintInfo | null;
+}
+
+/** Dados da tela de "Game Over". */
+export interface FaintInfo {
+  xpLost: number;
+  goldLost: number;
+  level: number;
 }
 
 /** Contadores vitalícios para a tela de status. */

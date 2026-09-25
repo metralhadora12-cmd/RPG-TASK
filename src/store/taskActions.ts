@@ -62,8 +62,8 @@ export interface TaskActions {
   deleteSubtask: (taskId: string, subtaskId: string) => void;
 }
 
-/** Estorna um evento de conclusão no personagem, inclusive pontos já distribuídos. */
-function revertOnCharacter(c: Character, event: RewardEvent): Character {
+/** Estorna um evento de recompensa no personagem, inclusive pontos já distribuídos. */
+export function revertOnCharacter(c: Character, event: RewardEvent): Character {
   const reverted = revertReward(progressOf(c), {
     xp: event.xp,
     gold: event.gold,
@@ -81,7 +81,7 @@ function revertOnCharacter(c: Character, event: RewardEvent): Character {
   };
 }
 
-function progressOf(c: Character): ProgressState {
+export function progressOf(c: Character): ProgressState {
   return { level: c.level, xp: c.xp, hp: c.hp, mp: c.mp, gold: c.gold, unspentPoints: c.unspentPoints };
 }
 
@@ -109,6 +109,8 @@ export function createTaskActions(set: StoreSet, get: StoreGet): TaskActions {
           id,
           listId,
           kind: input.kind ?? 'todo',
+          recurrence: input.kind === 'daily' ? { type: 'daily' } : undefined,
+          habitDirection: input.kind === 'habit' ? 'both' : undefined,
           title: input.title.trim(),
           difficulty: input.difficulty ?? 'easy',
           important: input.important ?? false,
@@ -173,7 +175,7 @@ export function createTaskActions(set: StoreSet, get: StoreGet): TaskActions {
       const reward = computeReward({
         difficulty: task.difficulty,
         subtasksDone: task.subtasks.filter((st) => st.done).length,
-        onTime: Boolean(task.dueDate && day <= task.dueDate),
+        onTime: task.kind === 'todo' && Boolean(task.dueDate && day <= task.dueDate),
         streak: task.kind === 'daily' ? task.streak : 0,
         classId: character.classId,
         random: options.random ?? Math.random,
@@ -193,7 +195,9 @@ export function createTaskActions(set: StoreSet, get: StoreGet): TaskActions {
         mpHealed: applied.delta.mpHealed,
         pointsGained: applied.delta.pointsGained,
         spawnedTaskId: spawned?.id,
+        streakBefore: task.kind === 'daily' ? task.streak : undefined,
       };
+      const newStreak = task.kind === 'daily' ? task.streak + 1 : task.streak;
       result.reward = {
         eventId: event.id,
         xp: event.xp,
@@ -207,7 +211,7 @@ export function createTaskActions(set: StoreSet, get: StoreGet): TaskActions {
 
       set((s) => ({
         tasks: [
-          ...s.tasks.map((t) => (t.id === id ? { ...t, completedAt: now, updatedAt: now } : t)),
+          ...s.tasks.map((t) => (t.id === id ? { ...t, completedAt: now, streak: newStreak, updatedAt: now } : t)),
           ...(spawned ? [spawned] : []),
         ],
         character: { ...s.character, ...applied.state },
@@ -218,6 +222,7 @@ export function createTaskActions(set: StoreSet, get: StoreGet): TaskActions {
           xpEarned: s.lifetime.xpEarned + event.xp,
           goldEarned: s.lifetime.goldEarned + event.gold,
           criticals: s.lifetime.criticals + (reward.critical ? 1 : 0),
+          bestStreak: Math.max(s.lifetime.bestStreak, newStreak),
         },
       }));
       return result;
@@ -235,7 +240,11 @@ export function createTaskActions(set: StoreSet, get: StoreGet): TaskActions {
       set((s) => ({
         tasks: s.tasks
           .filter((t) => !(dropSpawned && t.id === spawned.id))
-          .map((t) => (t.id === id ? { ...t, completedAt: undefined, updatedAt: now } : t)),
+          .map((t) =>
+            t.id === id
+              ? { ...t, completedAt: undefined, streak: event?.streakBefore ?? t.streak, updatedAt: now }
+              : t,
+          ),
         ...(event
           ? {
               character: revertOnCharacter(s.character, event),

@@ -2,7 +2,8 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode 
 import { addDaysKey, dayOf, formatDay } from '@/lib/date';
 import { t } from '@/lib/i18n';
 import { useGameStore } from '@/store/useGameStore';
-import type { Recurrence, Task, Weekday } from '@/store/types';
+import type { HabitDirection, Recurrence, Task, TaskKind, Weekday } from '@/store/types';
+import { damageFor } from '@/features/progression/formulas';
 import { Button } from '@/ui/Button';
 import { Checkbox } from '@/ui/Checkbox';
 import { ListIcon } from '@/ui/ListIcon';
@@ -106,13 +107,17 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
   const lists = useGameStore((s) => s.lists);
   const commands = useTaskCommands();
   const today = useToday();
-  const ids = { title: useId(), due: useId(), reminder: useId(), recurrence: useId(), difficulty: useId(), list: useId(), tags: useId(), notes: useId(), step: useId(), interval: useId() };
+  const ids = { title: useId(), due: useId(), reminder: useId(), recurrence: useId(), difficulty: useId(), list: useId(), tags: useId(), notes: useId(), step: useId(), interval: useId(), kind: useId(), direction: useId() };
   const [newStep, setNewStep] = useState('');
   const [newTag, setNewTag] = useState('');
   const [reminderDenied, setReminderDenied] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const update = (patch: Partial<Task>) => store().updateTask(task.id, patch);
   const done = Boolean(task.completedAt);
+  const isDaily = task.kind === 'daily';
+  const isHabit = task.kind === 'habit';
+  const penaltiesEnabled = useGameStore((s) => s.settings.penaltiesEnabled);
+  const classId = useGameStore((s) => s.character.classId);
   const recurrenceType: RecurrenceType = task.recurrence?.type ?? 'none';
 
   useEffect(() => {
@@ -127,9 +132,17 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
   };
 
   const setDue = (dueDate: string | undefined) => {
-    if (!dueDate) update({ dueDate: undefined, recurrence: undefined });
+    // Rotinas continuam repetindo sem data (usam a data de criação como início).
+    if (!dueDate) update({ dueDate: undefined, recurrence: isDaily ? task.recurrence : undefined });
     else update({ dueDate });
   };
+
+  const setKind = (kind: TaskKind) =>
+    update({
+      kind,
+      recurrence: kind === 'daily' ? (task.recurrence ?? { type: 'daily' }) : task.recurrence,
+      habitDirection: kind === 'habit' ? (task.habitDirection ?? 'both') : task.habitDirection,
+    });
 
   const setRecurrence = (type: RecurrenceType) => {
     const recurrence = recurrenceFor(type, task.recurrence);
@@ -147,12 +160,14 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
     <div ref={panelRef} tabIndex={-1} onKeyDown={onKeyDown} className="outline-none" aria-label={t('tasks.detail.title')} role="region">
       <Window className="flex flex-col gap-4">
         <div className="flex items-start gap-2">
-          <Checkbox
-            checked={done}
-            onChange={(_, el) => commands.toggleComplete(task.id, el)}
-            label={t(done ? 'tasks.uncomplete' : 'tasks.complete', { title: task.title })}
-            className="mt-1"
-          />
+          {!isHabit ? (
+            <Checkbox
+              checked={done}
+              onChange={(_, el) => commands.toggleComplete(task.id, el)}
+              label={t(done ? 'tasks.uncomplete' : 'tasks.complete', { title: task.title })}
+              className="mt-1"
+            />
+          ) : null}
           <div className="min-w-0 flex-1">
             <label htmlFor={ids.title} className="sr-only">
               {t('tasks.detail.name')}
@@ -179,6 +194,16 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
         </div>
 
         {!done ? <RewardPreview task={task} today={today} /> : null}
+        {task.kind !== 'todo' ? (
+          <p className="text-win-dim">
+            {penaltiesEnabled
+              ? t('tasks.damagePreview', { n: damageFor(task.difficulty, classId) })
+              : t('tasks.damagePreviewOff')}
+          </p>
+        ) : null}
+
+        {!isHabit ? (
+          <>
 
         <Field label={t('tasks.detail.steps')} htmlFor={ids.step}>
           <ul className="flex flex-col gap-1">
@@ -227,12 +252,14 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
           </form>
         </Field>
 
-        <Button variant="solid" onClick={() => store().toggleMyDay(task.id)} aria-pressed={task.myDayDate === today}>
-          <ListIcon icon="sun" color={palette.gold} scale={1} />
-          {t(task.myDayDate === today ? 'tasks.detail.removeMyDay' : 'tasks.detail.myDay')}
-        </Button>
+        {!isDaily ? (
+          <Button variant="solid" onClick={() => store().toggleMyDay(task.id)} aria-pressed={task.myDayDate === today}>
+            <ListIcon icon="sun" color={palette.gold} scale={1} />
+            {t(task.myDayDate === today ? 'tasks.detail.removeMyDay' : 'tasks.detail.myDay')}
+          </Button>
+        ) : null}
 
-        <Field label={t('tasks.detail.dueDate')} htmlFor={ids.due}>
+        <Field label={t(isDaily ? 'tasks.detail.startDate' : 'tasks.detail.dueDate')} htmlFor={ids.due}>
           <input
             id={ids.due}
             type="date"
@@ -240,12 +267,14 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
             value={task.dueDate ?? ''}
             onChange={(e) => setDue(e.target.value || undefined)}
           />
-          <div className="flex flex-wrap gap-1">
-            <Button onClick={() => setDue(today)}>{t('tasks.detail.today')}</Button>
-            <Button onClick={() => setDue(addDaysKey(today, 1))}>{t('tasks.detail.tomorrow')}</Button>
-            <Button onClick={() => setDue(addDaysKey(today, 7))}>{t('tasks.detail.nextWeek')}</Button>
-            {task.dueDate ? <Button onClick={() => setDue(undefined)}>{t('tasks.detail.clear')}</Button> : null}
-          </div>
+          {!isDaily ? (
+            <div className="flex flex-wrap gap-1">
+              <Button onClick={() => setDue(today)}>{t('tasks.detail.today')}</Button>
+              <Button onClick={() => setDue(addDaysKey(today, 1))}>{t('tasks.detail.tomorrow')}</Button>
+              <Button onClick={() => setDue(addDaysKey(today, 7))}>{t('tasks.detail.nextWeek')}</Button>
+              {task.dueDate ? <Button onClick={() => setDue(undefined)}>{t('tasks.detail.clear')}</Button> : null}
+            </div>
+          ) : null}
         </Field>
 
         <Field label={t('tasks.detail.recurrence')} htmlFor={ids.recurrence}>
@@ -255,7 +284,7 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
             value={recurrenceType}
             onChange={(e) => setRecurrence(e.target.value as RecurrenceType)}
           >
-            {recurrenceTypes.map((type) => (
+            {recurrenceTypes.filter((type) => !(isDaily && type === 'none')).map((type) => (
               <option key={type} value={type}>
                 {t(recurrenceLabel[type])}
               </option>
@@ -329,7 +358,35 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
           {reminderDenied ? <p className="text-win-dim">{t('tasks.detail.reminderDenied')}</p> : null}
         </Field>
 
+          </>
+        ) : null}
+
         <div className="grid grid-cols-2 gap-3">
+          <Field label={t('tasks.kind')} htmlFor={ids.kind}>
+            <select id={ids.kind} className="px-input" value={task.kind} onChange={(e) => setKind(e.target.value as TaskKind)}>
+              {(['todo', 'daily', 'habit'] as const).map((k) => (
+                <option key={k} value={k}>
+                  {t(`tasks.kind.${k}`)}
+                </option>
+              ))}
+            </select>
+          </Field>
+          {isHabit ? (
+            <Field label={t('tasks.detail.habitDirection')} htmlFor={ids.direction}>
+              <select
+                id={ids.direction}
+                className="px-input"
+                value={task.habitDirection ?? 'both'}
+                onChange={(e) => update({ habitDirection: e.target.value as HabitDirection })}
+              >
+                {(['both', 'up', 'down'] as const).map((d) => (
+                  <option key={d} value={d}>
+                    {t(`tasks.habit.${d}`)}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          ) : null}
           <Field label={t('tasks.difficulty')} htmlFor={ids.difficulty}>
             <select
               id={ids.difficulty}

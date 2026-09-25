@@ -1,14 +1,14 @@
 import { defaultSettings } from './defaults';
 import { defaultCharacter, defaultLifetime } from '@/features/character/defaults';
 import { inboxList } from './listActions';
-import type { TaskList } from './types';
+import type { Task, TaskList } from './types';
 import type { PersistedState } from './useGameStore';
 
 /**
  * Versão atual do estado persistido. Ao mudar o formato do estado:
  * incremente, adicione um passo em `steps` e um teste em `migrations.test.ts`.
  */
-export const STORE_VERSION = 3;
+export const STORE_VERSION = 4;
 
 type Step = (state: Record<string, unknown>) => Record<string, unknown>;
 
@@ -39,6 +39,17 @@ const steps: Record<number, Step> = {
     ...state,
     character: state.character ?? defaultCharacter(),
     lifetime: { ...defaultLifetime(), ...(state.lifetime as object | undefined) },
+  }),
+  // v3 → v4: rotinas com recorrência padrão, hábitos com direção, avisos pendentes.
+  3: (state) => ({
+    ...state,
+    tasks: ((state.tasks as Task[] | undefined) ?? []).map((task) => ({
+      ...task,
+      recurrence: task.kind === 'daily' ? (task.recurrence ?? { type: 'daily' }) : task.recurrence,
+      habitDirection: task.kind === 'habit' ? (task.habitDirection ?? 'both') : task.habitDirection,
+    })),
+    pendingReport: state.pendingReport ?? null,
+    pendingFaint: state.pendingFaint ?? null,
   }),
 };
 

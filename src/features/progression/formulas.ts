@@ -212,3 +212,55 @@ export function revertReward(state: ProgressState, delta: ProgressDelta): Progre
     unspentPoints: Math.max(0, state.unspentPoints - lostLevels * POINTS_PER_LEVEL),
   };
 }
+
+// ---------------------------------------------------------------------------
+// Dano e desmaio
+// ---------------------------------------------------------------------------
+
+/** Dano por rotina não feita / hábito negativo, por dificuldade. */
+export const DAMAGE: Record<Difficulty, number> = {
+  trivial: 1,
+  easy: 3,
+  medium: 5,
+  hard: 7,
+  epic: 10,
+};
+
+/** Fração do Gold perdida ao desmaiar. */
+export const FAINT_GOLD_LOSS = 0.1;
+
+/** Dano após o bônus de classe (Clérigo −30%), nunca menor que 1. */
+export function damageFor(difficulty: Difficulty, classId: ClassId): number {
+  const base = DAMAGE[difficulty];
+  return classId === 'cleric' ? Math.max(1, Math.round(base * (1 - CLASS_BONUS.clericPenalty))) : base;
+}
+
+export interface FaintResult {
+  xpLost: number;
+  goldLost: number;
+}
+
+/**
+ * Aplica dano. Se o HP chega a 0 o herói desmaia: o XP volta ao início do
+ * nível atual, perde 10% do Gold (arredondado para baixo) e o HP enche de novo.
+ */
+export function applyDamage(
+  state: ProgressState,
+  damage: number,
+): { state: ProgressState; hpLost: number; faint: FaintResult | null } {
+  const dmg = Math.max(0, Math.round(damage));
+  const hp = state.hp - dmg;
+  if (hp > 0) return { state: { ...state, hp }, hpLost: dmg, faint: null };
+  const goldLost = Math.floor(state.gold * FAINT_GOLD_LOSS);
+  return {
+    state: { ...state, hp: maxHp(state.level), xp: 0, gold: state.gold - goldLost },
+    hpLost: state.hp,
+    faint: { xpLost: state.xp, goldLost },
+  };
+}
+
+/** Cura sem passar do máximo. Devolve quanto curou de fato. */
+export function heal(state: ProgressState, amount: number): { state: ProgressState; healed: number } {
+  const hp = Math.min(maxHp(state.level), state.hp + Math.max(0, amount));
+  return { state: { ...state, hp }, healed: hp - state.hp };
+}

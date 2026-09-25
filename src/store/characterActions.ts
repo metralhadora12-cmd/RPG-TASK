@@ -1,6 +1,7 @@
 import { POINTS_PER_LEVEL } from '@/features/progression/formulas';
 import type { StatKey } from '@/features/character/stats';
 import { classBaseStats } from '@/sprites/characterParts';
+import { gameDayKey } from '@/lib/date';
 import type { Appearance, ClassId } from './types';
 import type { StoreGet, StoreSet } from './useGameStore';
 
@@ -34,6 +35,8 @@ export function createCharacterActions(set: StoreSet, get: StoreGet): CharacterA
           appearance: { ...appearance },
           stats: { ...classBaseStats[classId] },
           unspentPoints: (s.character.level - 1) * POINTS_PER_LEVEL,
+          // Dias antes do herói existir não contam para as rotinas.
+          lastDayProcessed: gameDayKey(new Date(), s.settings.dayStartHour),
         },
       }));
     },

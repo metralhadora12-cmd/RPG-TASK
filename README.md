@@ -16,6 +16,22 @@ npm run preview    # serve o build
 
 ## Funcionalidades
 
+### Fase 5 — Rotinas e hábitos
+
+- **Rotinas** (`/missoes/rotinas`): tarefas diárias com recorrência (diária, dias úteis, semanal com dias, mensal, anual, a cada N dias) contada a partir da data de início.
+  - A tela separa "Valem hoje" de "Fora do dia". As rotinas que valem hoje também aparecem no **Meu Dia**.
+  - Concluir soma **sequência**, que dá +2% por dia até +40% e alimenta a "Maior sequência" do Status. Reabrir devolve a sequência.
+- **Hábitos** (`/missoes/habitos`): botões **+** e **−** que podem ser usados várias vezes ao dia, com contador diário e opção de mostrar só +, só − ou ambos.
+  - + dá XP/Gold como uma conclusão; − causa dano, com número vermelho, tremida da tela e flash.
+  - Tudo com "Desfazer". Pelo teclado, as teclas + e − agem no hábito focado.
+- **Virada do dia**: na primeira abertura do dia (ou quando o dia vira com o app aberto, respeitando o horário configurado), os dias pendentes são fechados.
+  - Rotina que valia e não foi feita causa dano uma única vez, mesmo depois de vários dias sem abrir (como no Habitica), e perde a sequência.
+  - Rotinas feitas voltam a ficar pendentes, com os passos desmarcados.
+- **Relatório da noite**: diálogo com as rotinas cumpridas e esquecidas, o dano de cada uma, o total e as sequências perdidas.
+- **Desmaio**: HP chegou a 0 → o XP volta ao início do nível atual, perde 10% do Gold e o HP enche. Aparece a tela de **GAME OVER** com o herói caído, as perdas e "Continuar". O evento não pode ser desfeito.
+- **Penalidades desligáveis** em Menu: sem dano, mas a sequência ainda zera.
+- O painel da missão tem o campo **Tipo** (Missão/Rotina/Hábito) e mostra "Dano se falhar".
+
 ### Fase 4 — Personagem
 
 - **Sprites procedurais em camadas** (`src/sprites/`). Cada parte é uma matriz 32×32 de chaves de paleta, escrita como texto em `layerData.ts`. Camadas simétricas guardam só a metade esquerda, que é espelhada em tempo de execução.
@@ -94,7 +110,7 @@ Para arrastar pelo teclado: foque a alça ⋮⋮, pressione Espaço, use as seta
 - **Paleta e temas** (`src/ui/palette.ts`): paleta limitada e 5 temas de janela (Azul Clássico, Pergaminho, Floresta, Lava, Noite Estrelada), aplicados como variáveis CSS. Um teste garante contraste AA (≥ 4,5) do texto em todo o gradiente de cada tema.
 - **Fontes** Press Start 2P (títulos) e VT323 (texto), empacotadas via @fontsource para funcionar offline. A opção "Fonte legível" troca o texto do corpo por uma fonte do sistema.
 - **Rotas**: `/missoes/...`, `/personagem`, `/loja`, `/menu` (configurações) e `/dev/ui` (vitrine do design system). Barra lateral no desktop e abas inferiores no mobile.
-- **Store** (`src/store/`): Zustand com `persist` em IndexedDB (`idb-keyval`), estado versionado (v2) e migrações testadas. O modelo de dados fica em `src/store/types.ts`.
+- **Store** (`src/store/`): Zustand com `persist` em IndexedDB (`idb-keyval`), estado versionado (v4) e migrações testadas. O modelo de dados fica em `src/store/types.ts`.
 - **i18n** (`src/lib/i18n`): pt-BR completo, inglês parcial com fallback.
 
 ### Telas (descrição)
@@ -145,6 +161,18 @@ Gold   = max(1, round(base_gold × (1 + bônus + classe_gold) × sorte × críti
 | Crítico | 5% de chance de Gold ×2 |
 
 Exemplo: missão Média com 2 passos feitos e no prazo → XP = 20 × (1 + 0,2 + 0,2) = 28.
+
+### Dano e desmaio
+
+| Dificuldade | Dano (rotina perdida / hábito −) | Clérigo (−30%) |
+|---|---|---|
+| Trivial | 1 | 1 |
+| Fácil | 3 | 2 |
+| Média | 5 | 4 |
+| Difícil | 7 | 5 |
+| Épica | 10 | 7 |
+
+Desmaio (HP ≤ 0): o XP do nível atual vai a 0, perde `floor(10% do Gold)` e o HP volta ao máximo.
 
 ### Níveis
 

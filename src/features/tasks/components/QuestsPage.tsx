@@ -23,6 +23,8 @@ import {
 import { useToday } from '../useToday';
 import { QUESTS_BASE, searchPath, viewFromSlug, viewKey } from '../viewRoutes';
 import { AddTaskBar } from './AddTaskBar';
+import { HabitList } from './HabitList';
+import { isDailyDue } from '../dayCycle';
 import { ListEditDialog } from './ListEditDialog';
 import { ListsPanel } from './ListsPanel';
 import { TaskDetail } from './TaskDetail';
@@ -105,6 +107,8 @@ export function QuestsPage({ search = false }: { search?: boolean }) {
   const isPlanned = source.type === 'smart' && source.id === 'planned';
   const isCompleted = source.type === 'smart' && source.id === 'completed';
   const isMyDay = source.type === 'smart' && source.id === 'my-day';
+  const isDailies = source.type === 'smart' && source.id === 'dailies';
+  const isHabits = source.type === 'smart' && source.id === 'habits';
   const title = source.type === 'search' ? t('tasks.view.search') : list ? list.name : t(smart!.label);
   const selectedTask = selectedId ? tasks.find((x) => x.id === selectedId) : undefined;
 
@@ -124,6 +128,7 @@ export function QuestsPage({ search = false }: { search?: boolean }) {
       title: taskTitle,
       difficulty,
       listId: list?.id,
+      kind: isDailies ? 'daily' : isHabits ? 'habit' : 'todo',
       myDay: isMyDay,
       important: source.type === 'smart' && source.id === 'important',
       dueDate: isPlanned ? today : undefined,
@@ -135,7 +140,16 @@ export function QuestsPage({ search = false }: { search?: boolean }) {
         const groups = groupPlanned(viewTasks.open, today, weekStartsOn);
         return plannedBuckets.map((b) => ({ id: b, label: t(`tasks.planned.${b}`), tasks: groups[b] }));
       })()
-    : [{ id: 'open', tasks: sortTasks(viewTasks.open, sortMode) }];
+    : isDailies
+      ? [
+          { id: 'due', label: t('tasks.dailies.today'), tasks: sortTasks(viewTasks.open.filter((d) => isDailyDue(d, today)), sortMode) },
+          {
+            id: 'off',
+            label: t('tasks.dailies.notToday'),
+            tasks: sortTasks(viewTasks.open.filter((d) => !isDailyDue(d, today)), sortMode),
+          },
+        ]
+      : [{ id: 'open', tasks: sortTasks(viewTasks.open, sortMode) }];
   const hasOpen = openSections.some((s) => s.tasks.length > 0);
   const suggestions = isMyDay ? myDaySuggestions(tasks, today) : [];
 
@@ -203,7 +217,10 @@ export function QuestsPage({ search = false }: { search?: boolean }) {
         ) : null}
       </Window>
 
-      {source.type !== 'search' && !isCompleted ? <AddTaskBar onAdd={addTask} /> : null}
+      {source.type !== 'search' && !isCompleted ? <AddTaskBar
+          onAdd={addTask}
+          placeholder={t(isDailies ? 'tasks.add.daily' : isHabits ? 'tasks.add.habit' : 'tasks.add.placeholder')}
+        /> : null}
 
       {isMyDay ? (
         <Window as="div" className="py-2!">
@@ -249,12 +266,20 @@ export function QuestsPage({ search = false }: { search?: boolean }) {
           ) : (
             <p className="text-win-dim">{t('tasks.empty.completed')}</p>
           )
+        ) : isHabits && hasOpen ? (
+          <HabitList
+            aria-label={title}
+            habits={openSections[0]!.tasks}
+            today={today}
+            selectedId={selectedId}
+            onOpen={open}
+          />
         ) : hasOpen ? (
           <TaskList
             aria-label={title}
             sections={openSections}
             today={today}
-            sortable={sortMode === 'manual' && !isPlanned}
+            sortable={sortMode === 'manual' && !isPlanned && !isDailies}
             showListName={source.type !== 'list'}
             hideMyDayBadge={isMyDay}
             selectedId={selectedId}
@@ -266,10 +291,12 @@ export function QuestsPage({ search = false }: { search?: boolean }) {
               ? query.trim()
                 ? t('tasks.empty.search', { q: query })
                 : t('tasks.search.placeholder')
-              : t('tasks.empty')}
+              : t(isDailies ? 'tasks.empty.dailies' : isHabits ? 'tasks.empty.habits' : 'tasks.empty')}
           </p>
         )}
-        {hasOpen && !isCompleted ? <p className="mt-3 hidden text-base text-win-dim md:block">{t('tasks.shortcuts')}</p> : null}
+        {hasOpen && !isCompleted ? (
+          <p className="mt-3 hidden text-base text-win-dim md:block">{t(isHabits ? 'tasks.habitShortcuts' : 'tasks.shortcuts')}</p>
+        ) : null}
       </Window>
 
       {!isCompleted && viewTasks.done.length > 0 ? (

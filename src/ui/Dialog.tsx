@@ -82,6 +82,7 @@ export function Dialog({ open, onClose, title, text, children, actions = [], por
         ref={containerRef}
         role="dialog"
         aria-modal="true"
+        aria-label={typeof title === 'string' ? title : undefined}
         aria-describedby={text ? descId : undefined}
         tabIndex={-1}
         className="w-full max-w-xl outline-none"

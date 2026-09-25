@@ -36,6 +36,14 @@ describe('migrate', () => {
     expect(migrate({ character: hero }, 2).character).toBe(hero);
   });
 
+  it('v3 → v4 completa rotinas e hábitos antigos', () => {
+    const state = migrate({ tasks: [{ id: 'd', kind: 'daily' }, { id: 'h', kind: 'habit' }, { id: 't', kind: 'todo' }] }, 3);
+    expect(state.tasks[0]!.recurrence).toEqual({ type: 'daily' });
+    expect(state.tasks[1]!.habitDirection).toBe('both');
+    expect(state.tasks[2]!.recurrence).toBeUndefined();
+    expect(state.pendingReport).toBeNull();
+  });
+
   it('não altera um save que já está na versão atual', () => {
     const save = { settings: defaultSettings, tasks: [{ id: 'x' }] };
     expect(migrate(save, STORE_VERSION)).toBe(save);

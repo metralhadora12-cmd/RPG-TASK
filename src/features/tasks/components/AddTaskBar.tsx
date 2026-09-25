@@ -7,10 +7,11 @@ import { difficulties } from '../constants';
 
 export interface AddTaskBarProps {
   onAdd: (title: string, difficulty: Difficulty) => void;
+  placeholder?: string;
 }
 
 /** Campo "Adicionar uma missão" com seletor de dificuldade. */
-export function AddTaskBar({ onAdd }: AddTaskBarProps) {
+export function AddTaskBar({ onAdd, placeholder = t('tasks.add.placeholder') }: AddTaskBarProps) {
   const [title, setTitle] = useState('');
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const ids = { title: useId(), difficulty: useId() };
@@ -33,7 +34,7 @@ export function AddTaskBar({ onAdd }: AddTaskBarProps) {
           id={ids.title}
           data-add-task
           className="px-input min-w-[10rem] flex-1"
-          placeholder={`+ ${t('tasks.add.placeholder')}`}
+          placeholder={`+ ${placeholder}`}
           value={title}
           maxLength={200}
           onChange={(e) => setTitle(e.target.value)}

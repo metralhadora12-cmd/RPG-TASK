@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { ClassId, Difficulty } from '@/store/types';
 import {
+  applyDamage,
   applyReward,
+  damageFor,
+  heal,
   computeReward,
   goldRange,
   levelFromTotalXp,
@@ -205,5 +208,37 @@ describe('applyReward / revertReward', () => {
   it('ouro não fica negativo se já foi gasto', () => {
     const { state, delta } = applyReward(start, 5, 6);
     expect(revertReward({ ...state, gold: 2 }, delta).gold).toBe(0);
+  });
+});
+
+describe('dano e desmaio', () => {
+  const hero: ProgressState = { level: 3, xp: 40, hp: 12, mp: 5, gold: 95, unspentPoints: 0 };
+
+  it.each([
+    ['trivial', 1, 1],
+    ['easy', 3, 2],
+    ['medium', 5, 4],
+    ['hard', 7, 5],
+    ['epic', 10, 7],
+  ] as [Difficulty, number, number][])('%s: %i de dano (Clérigo: %i)', (difficulty, normal, cleric) => {
+    expect(damageFor(difficulty, 'warrior')).toBe(normal);
+    expect(damageFor(difficulty, 'cleric')).toBe(cleric);
+  });
+
+  it('dano comum só tira HP', () => {
+    const r = applyDamage(hero, 5);
+    expect(r).toMatchObject({ hpLost: 5, faint: null, state: { hp: 7, xp: 40, gold: 95 } });
+  });
+
+  it('HP a zero: desmaia, XP volta ao início do nível, perde 10% do Gold e HP enche', () => {
+    const r = applyDamage(hero, 12);
+    expect(r.faint).toEqual({ xpLost: 40, goldLost: 9 });
+    expect(r.state).toMatchObject({ level: 3, xp: 0, gold: 86, hp: maxHp(3) });
+    expect(r.hpLost).toBe(12);
+  });
+
+  it('cura não passa do máximo', () => {
+    expect(heal(hero, 15).state.hp).toBe(27);
+    expect(heal({ ...hero, hp: maxHp(3) - 2 }, 15).healed).toBe(2);
   });
 });

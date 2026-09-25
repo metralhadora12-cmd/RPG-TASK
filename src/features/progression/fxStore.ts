@@ -22,10 +22,23 @@ export interface LevelUpInfo {
 interface FxState {
   floats: FloatingNumber[];
   levelUp: LevelUpInfo | null;
+  /** Incrementa a cada dano (dispara tremida + flash vermelho). */
+  hitKey: number;
 }
 
 /** Efeitos visuais passageiros (não persistidos). */
-export const useFxStore = create<FxState>(() => ({ floats: [], levelUp: null }));
+export const useFxStore = create<FxState>(() => ({ floats: [], levelUp: null, hitKey: 0 }));
+
+/** Tremida da tela e flash vermelho ao sofrer dano. */
+export function hitScreen(): void {
+  useFxStore.setState((s) => ({ hitKey: s.hitKey + 1 }));
+}
+
+/** Ponto de origem dos números flutuantes a partir de um elemento (ou o centro da tela). */
+export function originOf(el?: Element | null): { x: number; y: number } {
+  const rect = el?.getBoundingClientRect();
+  return rect ? { x: rect.left + rect.width / 2, y: rect.top } : { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+}
 
 export function spawnFloats(origin: { x: number; y: number }, items: { kind: FloatKind; text: string }[]): void {
   const floats = items.map((item, i) => ({

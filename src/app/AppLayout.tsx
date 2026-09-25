@@ -10,6 +10,7 @@ import { useReminders } from '@/features/tasks/useReminders';
 import { Toasts } from '@/ui/Toasts';
 import { FloatingNumbers } from '@/features/progression/FloatingNumbers';
 import { LevelUpOverlay } from '@/features/progression/LevelUpOverlay';
+import { DamageFx, GameOverOverlay, NightReportDialog, useDayCycle } from '@/features/progression/DayOverlays';
 import { useMediaQuery } from '@/ui/useMediaQuery';
 import { Hud } from './Hud';
 import { mainNav } from './navigation';
@@ -79,6 +80,7 @@ export function AppLayout() {
   const inQuests = wide && pathname.startsWith('/missoes');
   const needsHero = useGameStore((s) => !s.character.name);
   useReminders();
+  useDayCycle();
   // Primeiro acesso: criação de personagem obrigatória (o /dev fica liberado).
   if (needsHero && !pathname.startsWith('/dev')) return <Navigate to="/criar" replace />;
   return (
@@ -108,7 +110,10 @@ export function AppLayout() {
       <BottomTabs />
       <Toasts />
       <FloatingNumbers />
+      <DamageFx />
       <LevelUpOverlay />
+      <NightReportDialog />
+      <GameOverOverlay />
     </div>
   );
 }

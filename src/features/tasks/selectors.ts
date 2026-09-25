@@ -1,6 +1,7 @@
 import { addDays, endOfWeek, format, parseISO } from 'date-fns';
 import type { SortMode, Task } from '@/store/types';
 import { difficultyRank, type SmartViewId } from './constants';
+import { isDailyDue } from './dayCycle';
 
 /** Identifica o que está sendo exibido: uma lista inteligente ou uma lista do usuário. */
 export type ViewRef = { type: 'smart'; id: SmartViewId } | { type: 'list'; id: string };
@@ -16,8 +17,9 @@ export interface ViewTasks {
 }
 
 const isOpen = (task: Task) => !task.completedAt;
-/** Hábitos têm tela própria; as listas mostram missões e rotinas. */
+/** Hábitos têm tela própria; as listas do usuário mostram missões e rotinas. */
 const isListable = (task: Task) => task.kind !== 'habit';
+const isTodo = (task: Task) => task.kind === 'todo';
 
 export function isInMyDay(task: Task, today: string): boolean {
   return task.myDayDate === today;
@@ -29,15 +31,24 @@ export function isOverdue(task: Task, today: string): boolean {
 
 /** Tarefas de uma visão, separadas em pendentes e concluídas (sem ordenação). */
 export function selectViewTasks(tasks: Task[], view: ViewRef, { today }: ViewContext): ViewTasks {
-  const pool = tasks.filter(isListable);
+  let pool = tasks.filter(isTodo);
   let matches: (task: Task) => boolean;
   if (view.type === 'list') {
+    pool = tasks.filter(isListable);
     matches = (task) => task.listId === view.id;
   } else {
     switch (view.id) {
       case 'my-day':
-        matches = (task) => isInMyDay(task, today);
+        // Missões marcadas para hoje + rotinas que valem hoje.
+        pool = tasks.filter(isListable);
+        matches = (task) => (task.kind === 'daily' ? isDailyDue(task, today) : isInMyDay(task, today));
         break;
+      case 'dailies':
+        pool = tasks.filter((t) => t.kind === 'daily');
+        matches = () => true;
+        break;
+      case 'habits':
+        return { open: tasks.filter((t) => t.kind === 'habit'), done: [] };
       case 'important':
         matches = (task) => task.important;
         break;
@@ -63,7 +74,11 @@ export function selectViewTasks(tasks: Task[], view: ViewRef, { today }: ViewCon
 
 export function countOpen(tasks: Task[], view: ViewRef, ctx: ViewContext): number {
   const { open, done } = selectViewTasks(tasks, view, ctx);
-  return view.type === 'smart' && view.id === 'completed' ? done.length : open.length;
+  if (view.type === 'smart' && view.id === 'completed') return done.length;
+  // Rotinas: só as que ainda valem hoje.
+  if (view.type === 'smart' && view.id === 'dailies') return open.filter((t) => isDailyDue(t, ctx.today)).length;
+  if (view.type === 'smart' && view.id === 'habits') return 0;
+  return open.length;
 }
 
 export type PlannedBucket = 'overdue' | 'today' | 'tomorrow' | 'thisWeek' | 'later';
@@ -144,7 +159,7 @@ export function myDaySuggestions(tasks: Task[], today: string, limit = 8): Task[
   return sortTasks(
     tasks.filter(
       (task) =>
-        isListable(task) &&
+        isTodo(task) &&
         isOpen(task) &&
         !isInMyDay(task, today) &&
         ((task.dueDate !== undefined && task.dueDate <= today) ||

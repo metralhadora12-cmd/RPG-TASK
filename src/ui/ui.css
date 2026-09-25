@@ -391,6 +391,20 @@
   }
 }
 
+@keyframes damage-flash {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.damage-flash {
+  background: #e83838;
+  opacity: 0;
+  animation: damage-flash 350ms steps(4) forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .px-cursor,
   .px-caret {
