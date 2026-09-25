@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -52,8 +52,16 @@ describe('App', () => {
     expect(useGameStore.getState().settings.readableFont).toBe(true);
     expect(document.documentElement).toHaveClass('font-readable');
 
+    // Sem o item, o tema nem aparece; com ele, escolher equipa.
+    expect(screen.queryByRole('option', { name: 'Lava' })).not.toBeInTheDocument();
+    await act(async () => {
+      useGameStore.setState((s) => ({
+        character: { ...s.character, inventory: [{ itemId: 'theme-lava', qty: 1 }] },
+      }));
+    });
     await user.selectOptions(screen.getByLabelText('Tema das janelas'), 'lava');
     expect(useGameStore.getState().settings.theme).toBe('lava');
+    expect(useGameStore.getState().character.equipped.theme).toBe('theme-lava');
     expect(document.documentElement.style.getPropertyValue('--win-top')).toBe('#98301a');
   });
 

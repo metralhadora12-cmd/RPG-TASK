@@ -87,7 +87,7 @@ describe('composição', () => {
   it('segue a ordem de camadas e põe equipamentos nos slots certos', () => {
     const hat = { id: 'hat', rows: expandLayer({ rows: ['o'.repeat(32)] }), palette: basePalette };
     const cape = { id: 'cape', rows: expandLayer({ rows: [] }), palette: basePalette, behind: true };
-    const slots = characterLayers(look({ hairStyle: 3 }), 'idle0', { hat: [hat], accessory: [cape] }).map(
+    const slots = characterLayers(look({ hairStyle: 3 }), 'idle0', { layers: { hat: [hat], accessory: [cape] } }).map(
       (l) => `${l.slot}:${l.layer.id}`,
     );
     expect(slots).toEqual([

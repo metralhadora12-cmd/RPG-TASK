@@ -9,6 +9,7 @@ const colors: Record<FloatKind, string> = {
   critical: palette.rarityLegendary,
   damage: palette.hpRed,
   heal: palette.hpGreen,
+  coin: palette.gold,
 };
 
 /** Números "+20 XP" / "+6 G" que sobem e somem a partir do ponto de origem. */
@@ -30,7 +31,11 @@ export function FloatingNumbers() {
               fontSize: f.kind === 'critical' ? '0.9rem' : undefined,
             }}
             initial={{ opacity: 0, y: 0, x: '-50%', scale: f.kind === 'critical' ? 1.6 : 1 }}
-            animate={{ opacity: [0, 1, 1, 0], y: reduced ? 0 : -56, scale: 1 }}
+            animate={
+              f.kind === 'coin'
+                ? { opacity: [0, 1, 1, 0], x: reduced ? '-50%' : `calc(-50% + ${f.dx ?? 0}px)`, y: reduced ? 0 : [0, -48, -20], scale: 1 }
+                : { opacity: [0, 1, 1, 0], y: reduced ? 0 : -56, scale: 1 }
+            }
             transition={{ duration: 1.3, delay: f.delay, ease: 'easeOut', times: [0, 0.1, 0.7, 1] }}
             onAnimationComplete={() => removeFloat(f.id)}
           >

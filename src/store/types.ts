@@ -127,6 +127,8 @@ export interface RewardEvent {
   streakBefore?: number;
   /** Evento irreversível (ex.: desmaio no meio). */
   final?: boolean;
+  /** Item comprado (compras). */
+  itemId?: string;
   /** Preenchido quando o evento foi desfeito. */
   revertedAt?: string;
 }
@@ -157,6 +159,8 @@ export interface LifetimeStats {
   goldEarned: number;
   criticals: number;
   bestStreak: number;
+  goldSpent: number;
+  itemsBought: number;
 }
 
 export type ReducedMotionPref = 'system' | 'on' | 'off';

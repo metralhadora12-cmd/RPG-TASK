@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createId } from '@/lib/id';
 
-export type FloatKind = 'xp' | 'gold' | 'critical' | 'damage' | 'heal';
+export type FloatKind = 'xp' | 'gold' | 'critical' | 'damage' | 'heal' | 'coin';
 
 export interface FloatingNumber {
   id: string;
@@ -11,6 +11,8 @@ export interface FloatingNumber {
   y: number;
   /** Atraso (s) para escalonar vários números saindo do mesmo ponto. */
   delay: number;
+  /** Deslocamento horizontal final (moedas espalhando). */
+  dx?: number;
 }
 
 export interface LevelUpInfo {
@@ -54,6 +56,20 @@ export function spawnFloats(origin: { x: number; y: number }, items: { kind: Flo
 
 export function removeFloat(id: string): void {
   useFxStore.setState((s) => ({ floats: s.floats.filter((f) => f.id !== id) }));
+}
+
+/** Chuva de moedas saindo de um ponto (compras). */
+export function spawnCoins(origin: { x: number; y: number }, count = 8): void {
+  const coins = Array.from({ length: count }, (_, i) => ({
+    id: createId(),
+    kind: 'coin' as const,
+    text: '●',
+    x: origin.x,
+    y: origin.y,
+    delay: i * 0.03,
+    dx: Math.round((i - (count - 1) / 2) * 14 + (Math.random() - 0.5) * 10),
+  }));
+  useFxStore.setState((s) => ({ floats: [...s.floats, ...coins].slice(-30) }));
 }
 
 /** Enfileira um level up (se já houver um aberto, junta os ganhos). */

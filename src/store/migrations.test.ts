@@ -44,6 +44,16 @@ describe('migrate', () => {
     expect(state.pendingReport).toBeNull();
   });
 
+  it('v4 → v5 dá o tema já em uso como item e completa os contadores', () => {
+    const character = { name: 'A', inventory: [], equipped: {} };
+    const state = migrate({ settings: { ...defaultSettings, theme: 'lava' }, character, lifetime: { tasksCompleted: 3 } }, 4);
+    expect(state.character.inventory).toEqual([{ itemId: 'theme-lava', qty: 1 }]);
+    expect(state.character.equipped.theme).toBe('theme-lava');
+    expect(state.lifetime).toMatchObject({ tasksCompleted: 3, goldSpent: 0, itemsBought: 0 });
+    const classic = migrate({ settings: defaultSettings, character, lifetime: {} }, 4);
+    expect(classic.character.inventory).toEqual([]);
+  });
+
   it('não altera um save que já está na versão atual', () => {
     const save = { settings: defaultSettings, tasks: [{ id: 'x' }] };
     expect(migrate(save, STORE_VERSION)).toBe(save);

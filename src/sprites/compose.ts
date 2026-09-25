@@ -7,6 +7,7 @@ import {
   hairStyles,
   outfitShapes,
   skinTones,
+  type Outfit,
 } from './characterParts';
 import * as L from './layerData';
 import { breatheRows, expandLayer, widenRows } from './layers';
@@ -42,20 +43,30 @@ export interface CharacterLook {
 /** Camadas extras (equipamentos) por slot. */
 export type ExtraLayers = Partial<Record<Exclude<LayerSlot, 'hairBack' | 'body' | 'outfit' | 'face' | 'hairFront' | 'arms'>, PaletteLayer[]>>;
 
+/** Equipamentos aplicados ao herói. */
+export interface Equipment {
+  layers?: ExtraLayers;
+  /** Roupa equipada (substitui a roupa inicial). */
+  outfit?: Outfit;
+  /** Chapéus fechados (elmo, capuz) escondem o cabelo. */
+  hideHair?: boolean;
+}
+
 const at = <T,>(list: readonly T[], index: number): T => list[((index % list.length) + list.length) % list.length]!;
 
 /** Monta as camadas do personagem (já expandidas), em ordem de desenho. */
-export function characterLayers(look: CharacterLook, pose: Pose, extras: ExtraLayers = {}): { slot: LayerSlot; layer: PaletteLayer }[] {
+export function characterLayers(look: CharacterLook, pose: Pose, equipment: Equipment = {}): { slot: LayerSlot; layer: PaletteLayer }[] {
+  const extras = equipment.layers ?? {};
   const { appearance, classId } = look;
   const skin = at(skinTones, appearance.skin);
   const hair = at(hairStyles, appearance.hairStyle);
   const hairPalette = { ...basePalette, ...at(hairColors, appearance.hairColor).palette };
-  const outfit = at(classOutfits[classId], appearance.outfit);
+  const outfit = equipment.outfit ?? at(classOutfits[classId], appearance.outfit);
   // A gola deixa a pele aparecer, então a roupa também conhece a cor da pele.
   const outfitPalette = { ...basePalette, ...skin, ...outfit.palette };
 
   const base: Record<string, PaletteLayer[]> = {
-    hairBack: hair.back ? [{ id: `hair-back-${hair.id}`, rows: expandLayer(hair.back), palette: hairPalette }] : [],
+    hairBack: hair.back && !equipment.hideHair ? [{ id: `hair-back-${hair.id}`, rows: expandLayer(hair.back), palette: hairPalette }] : [],
     body: [{ id: 'body', rows: expandLayer(L.body), palette: { ...basePalette, ...skin } }],
     outfit: [{ id: outfit.id, rows: expandLayer(outfitShapes[outfit.shape]), palette: outfitPalette }],
     face: [
@@ -65,7 +76,7 @@ export function characterLayers(look: CharacterLook, pose: Pose, extras: ExtraLa
         palette: { ...basePalette, ...skin, ...at(eyeColors, appearance.eyes).palette },
       },
     ],
-    hairFront: [{ id: `hair-${hair.id}`, rows: expandLayer(hair.front), palette: hairPalette }],
+    hairFront: equipment.hideHair ? [] : [{ id: `hair-${hair.id}`, rows: expandLayer(hair.front), palette: hairPalette }],
     arms: [
       {
         id: pose === 'victory' ? 'arms-victory' : 'arms',
@@ -122,9 +133,9 @@ export function layDown(grid: PixelGrid): PixelGrid {
 }
 
 /** Compõe o sprite completo do personagem para uma pose. */
-export function composeCharacter(look: CharacterLook, pose: Pose, extras: ExtraLayers = {}): PixelGrid {
+export function composeCharacter(look: CharacterLook, pose: Pose, equipment: Equipment = {}): PixelGrid {
   const wide = look.appearance.body === 'b';
-  const layers = characterLayers(look, pose, extras).map(({ layer }) => {
+  const layers = characterLayers(look, pose, equipment).map(({ layer }) => {
     let rows: readonly string[] = layer.rows;
     if (!layer.fixed) {
       if (wide) rows = widenRows(rows);

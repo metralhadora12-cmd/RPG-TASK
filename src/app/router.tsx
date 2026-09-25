@@ -1,11 +1,12 @@
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router-dom';
 import { ListsPage, QuestsPage } from '@/features/tasks/components/QuestsPage';
 import { AppearancePage, CreateCharacterPage, StatusPage } from '@/features/character/CharacterPages';
+import { EquipmentPage } from '@/features/shop/EquipmentPage';
+import { ShopPage } from '@/features/shop/ShopPage';
 import { AppLayout } from './AppLayout';
 import { DevSpritesPage } from './pages/DevSpritesPage';
 import { DevUiPage } from './pages/DevUiPage';
 import { NotFoundPage } from './pages/NotFoundPage';
-import { PlaceholderPage } from './pages/PlaceholderPage';
 import { SettingsPage } from './pages/SettingsPage';
 
 export const routes: RouteObject[] = [
@@ -26,7 +27,8 @@ export const routes: RouteObject[] = [
       },
       { path: 'personagem', element: <StatusPage /> },
       { path: 'personagem/aparencia', element: <AppearancePage /> },
-      { path: 'loja', element: <PlaceholderPage title="page.shop.title" intro="page.shop.intro" phase={6} /> },
+      { path: 'loja', element: <ShopPage /> },
+      { path: 'personagem/equipamento', element: <EquipmentPage /> },
       { path: 'menu', element: <SettingsPage /> },
       { path: 'dev/ui', element: <DevUiPage /> },
       { path: 'dev/sprites', element: <DevSpritesPage /> },

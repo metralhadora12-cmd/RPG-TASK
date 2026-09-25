@@ -16,6 +16,24 @@ npm run preview    # serve o build
 
 ## Funcionalidades
 
+### Fase 6 — Loja e inventário
+
+- **Loja** (`/loja`) com **Bartolo, o Mercador**: NPC original montado com as mesmas peças do herói, mais bigode e chapéu próprios. Ele fala com efeito de digitação e reage a compra, falta de ouro ou falta de nível.
+- **Catálogo** (`src/features/shop/catalog.ts`) com **43 itens** em 8 abas (Ofertas, Chapéus, Roupas, Armas, Acessórios, Pets, Fundos, Temas, Itens).
+  - Cada item tem nome, descrição, preço, **raridade** (Comum/Incomum/Raro/Épico/Lendário, com a cor da borda) e nível mínimo.
+  - Toda a arte é original: camadas 32×32 com paleta própria, e alguns itens reaproveitam a mesma forma com outra paleta (ex.: Chapéu de Mago e Chapéu Astral).
+- **Ofertas do dia**: 4 itens com 20% de desconto, sorteados com semente pela data. São os mesmos o dia inteiro e mudam no dia seguinte.
+- **Prévia** no próprio herói (com o cenário, se houver). Temas mostram uma janela de amostra.
+- **Compra** com confirmação "Comprar X por 120G? Sim/Não", chuva de moedas e "−120 G". Vitrine navegável pelo teclado em grade (setas; Enter vai para "Comprar").
+- **Equipamento** (`/personagem/equipamento`): espaços como num menu de RPG (Chapéu, Roupa, Arma, Acessório, Mascote, Fundo, Tema), itens do espaço escolhido e a bolsa com a **Poção de Vida** (cura 15 HP, 25 G, empilhável; não é gasta com HP cheio).
+- **Sprite equipado em todo lugar**: HUD, Status, Game Over e prévias.
+  - Elmo e capuz escondem o cabelo; capas e asas ficam atrás do corpo.
+  - A arma fica na mão esquerda, que continua abaixada na pose de vitória.
+  - O mascote fica fixo no canto, sem respirar junto com o herói.
+- **Fundos de cenário** desenhados em canvas (vila, floresta, montanha, castelo, céu noturno), com **paralaxe** leve (parada com movimento reduzido).
+- **Temas de janela** agora são itens: em Menu → Tema só aparecem os temas possuídos. O Azul Clássico é grátis.
+- **Tudo é cosmético**, exceto a poção.
+
 ### Fase 5 — Rotinas e hábitos
 
 - **Rotinas** (`/missoes/rotinas`): tarefas diárias com recorrência (diária, dias úteis, semanal com dias, mensal, anual, a cada N dias) contada a partir da data de início.
@@ -110,7 +128,7 @@ Para arrastar pelo teclado: foque a alça ⋮⋮, pressione Espaço, use as seta
 - **Paleta e temas** (`src/ui/palette.ts`): paleta limitada e 5 temas de janela (Azul Clássico, Pergaminho, Floresta, Lava, Noite Estrelada), aplicados como variáveis CSS. Um teste garante contraste AA (≥ 4,5) do texto em todo o gradiente de cada tema.
 - **Fontes** Press Start 2P (títulos) e VT323 (texto), empacotadas via @fontsource para funcionar offline. A opção "Fonte legível" troca o texto do corpo por uma fonte do sistema.
 - **Rotas**: `/missoes/...`, `/personagem`, `/loja`, `/menu` (configurações) e `/dev/ui` (vitrine do design system). Barra lateral no desktop e abas inferiores no mobile.
-- **Store** (`src/store/`): Zustand com `persist` em IndexedDB (`idb-keyval`), estado versionado (v4) e migrações testadas. O modelo de dados fica em `src/store/types.ts`.
+- **Store** (`src/store/`): Zustand com `persist` em IndexedDB (`idb-keyval`), estado versionado (v5) e migrações testadas. O modelo de dados fica em `src/store/types.ts`.
 - **i18n** (`src/lib/i18n`): pt-BR completo, inglês parcial com fallback.
 
 ### Telas (descrição)

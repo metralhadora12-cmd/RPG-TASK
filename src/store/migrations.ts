@@ -1,14 +1,15 @@
 import { defaultSettings } from './defaults';
 import { defaultCharacter, defaultLifetime } from '@/features/character/defaults';
 import { inboxList } from './listActions';
-import type { Task, TaskList } from './types';
+import { themeItemId } from '@/features/shop/catalog';
+import type { Character, Settings, Task, TaskList } from './types';
 import type { PersistedState } from './useGameStore';
 
 /**
  * Versão atual do estado persistido. Ao mudar o formato do estado:
  * incremente, adicione um passo em `steps` e um teste em `migrations.test.ts`.
  */
-export const STORE_VERSION = 4;
+export const STORE_VERSION = 5;
 
 type Step = (state: Record<string, unknown>) => Record<string, unknown>;
 
@@ -51,6 +52,25 @@ const steps: Record<number, Step> = {
     pendingReport: state.pendingReport ?? null,
     pendingFaint: state.pendingFaint ?? null,
   }),
+  // v4 → v5: loja. Contadores de compras e o tema já escolhido vira item do inventário.
+  4: (state) => {
+    const settings = { ...defaultSettings, ...(state.settings as object | undefined) } as Settings;
+    const character = state.character as Character | null | undefined;
+    const themeItem = themeItemId(settings.theme);
+    const grantTheme = character && themeItem && !character.inventory.some((i) => i.itemId === themeItem);
+    return {
+      ...state,
+      lifetime: { ...defaultLifetime(), ...(state.lifetime as object | undefined) },
+      character:
+        character && grantTheme
+          ? {
+              ...character,
+              inventory: [...character.inventory, { itemId: themeItem, qty: 1 }],
+              equipped: { ...character.equipped, theme: themeItem },
+            }
+          : character,
+    };
+  },
 };
 
 export function migrate(persisted: unknown, fromVersion: number): PersistedState {

@@ -324,6 +324,50 @@
     opacity: 1;
   }
 
+  /* ---------- Loja ---------- */
+  .shop-card {
+    position: relative;
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 6px 6px;
+    color: var(--win-text);
+    background: rgb(0 0 0 / 0.25);
+    border: 3px solid;
+    border-radius: 4px;
+    font: inherit;
+    cursor: pointer;
+  }
+  .shop-card:hover,
+  .shop-card[data-active='true'] {
+    background: rgb(255 255 255 / 0.1);
+  }
+  .shop-card[aria-current='true'] {
+    box-shadow: 0 0 0 2px var(--win-accent);
+  }
+  .shop-card:focus-visible {
+    outline: 2px solid var(--win-accent);
+    outline-offset: 2px;
+  }
+  .shop-card .px-cursor-slot {
+    position: absolute;
+    left: -6px;
+    top: 8px;
+  }
+  .shop-badge {
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    padding: 0 4px;
+    font-size: 0.8em;
+    color: var(--win-text);
+    background: var(--win-bottom);
+    border: 2px solid var(--win-accent);
+    border-radius: 3px;
+  }
+
   /* ---------- Palco do sprite ---------- */
   .stage {
     padding: 12px 8px 6px;

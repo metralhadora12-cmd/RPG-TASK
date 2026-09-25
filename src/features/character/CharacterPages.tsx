@@ -2,7 +2,9 @@ import { useRef, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { maxHp, maxMp, xpToNextLevel } from '@/features/progression/formulas';
 import { t } from '@/lib/i18n';
-import { CharacterSprite, type CharacterPose } from '@/sprites/CharacterSprite';
+import { HeroSprite } from '@/features/shop/HeroSprite';
+import { HeroStage } from '@/features/shop/HeroStage';
+import type { CharacterPose } from '@/sprites/CharacterSprite';
 import { REINCARNATION_LEVEL } from '@/store/characterActions';
 import { useGameStore } from '@/store/useGameStore';
 import { Bar } from '@/ui/Bar';
@@ -87,9 +89,9 @@ export function StatusPage() {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
       <Window title={t('status.title')} className="flex flex-col gap-3">
-        <div className="stage flex justify-center">
-          <CharacterSprite look={character} pose={pose} scale={6} label={character.name} />
-        </div>
+        <HeroStage scale={6} width={320}>
+          <HeroSprite pose={pose} scale={6} label={character.name} />
+        </HeroStage>
         <div role="group" aria-label={t('status.poses')} className="flex flex-wrap justify-center gap-1">
           {poses.map((p) => (
             <button
@@ -120,6 +122,9 @@ export function StatusPage() {
         <div className="flex flex-wrap gap-2">
           <Link to="/personagem/aparencia" className="px-btn" data-variant="solid">
             {t('status.appearance')}
+          </Link>
+          <Link to="/personagem/equipamento" className="px-btn" data-variant="solid">
+            {t('equip.open')}
           </Link>
           {level >= REINCARNATION_LEVEL ? (
             <Link to="/personagem/aparencia" className="px-btn">

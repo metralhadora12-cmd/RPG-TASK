@@ -4,7 +4,7 @@ import { maxHp, maxMp, xpToNextLevel } from '@/features/progression/formulas';
 import { t } from '@/lib/i18n';
 import { useGameStore } from '@/store/useGameStore';
 import { Link } from 'react-router-dom';
-import { CharacterSprite } from '@/sprites/CharacterSprite';
+import { HeroSprite } from '@/features/shop/HeroSprite';
 import { Bar } from '@/ui/Bar';
 import { palette } from '@/ui/palette';
 import { PixelIcon } from '@/ui/PixelIcon';
@@ -38,7 +38,7 @@ export function Hud() {
     <header className="win sticky top-0 z-30 rounded-none px-3 py-2 sm:px-4">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-1">
         <Link to="/personagem" aria-label={t('nav.character')} className="shrink-0 rounded focus-visible:outline-2 focus-visible:outline-(--win-accent)">
-          <CharacterSprite look={character} scale={3} crop={{ x: [5, 27], y: [1, 20] }} />
+          <HeroSprite scale={3} crop={{ x: [5, 27], y: [0, 20] }} />
         </Link>
         <div className="min-w-[7rem]">
           <p className="font-title truncate text-[0.7rem] text-shadow-pixel">{character.name || t('hud.noHero')}</p>

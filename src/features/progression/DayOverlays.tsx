@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useToday } from '@/features/tasks/useToday';
 import { formatDay } from '@/lib/date';
 import { t } from '@/lib/i18n';
-import { CharacterSprite } from '@/sprites/CharacterSprite';
+import { HeroSprite } from '@/features/shop/HeroSprite';
 import { useGameStore } from '@/store/useGameStore';
 import type { NightReport } from '@/store/types';
 import { Button } from '@/ui/Button';
@@ -106,7 +106,6 @@ export function NightReportDialog() {
 export function GameOverOverlay() {
   const faint = useGameStore((s) => s.pendingFaint);
   const reportOpen = useGameStore((s) => Boolean(s.pendingReport));
-  const character = useGameStore((s) => s.character);
   const dismiss = useGameStore((s) => s.dismissFaint);
   const reduced = useReducedMotion();
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -147,7 +146,7 @@ export function GameOverOverlay() {
           >
             {t('faint.title')}
           </motion.h2>
-          <CharacterSprite look={character} pose="fainted" scale={5} animate={false} />
+          <HeroSprite pose="fainted" scale={5} animate={false} />
           <Window className="max-w-md">
             <p className="font-title mb-2 text-[0.7rem] text-win-accent">{t('faint.subtitle')}</p>
             <div id="game-over-body">
