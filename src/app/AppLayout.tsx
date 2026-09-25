@@ -1,4 +1,6 @@
+import { Suspense, useEffect } from 'react';
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { PageLoading } from './PageLoading';
 import { useGameStore } from '@/store/useGameStore';
 import { t } from '@/lib/i18n';
 import { CursorSlot } from '@/ui/Cursor';
@@ -8,6 +10,9 @@ import { Window } from '@/ui/Window';
 import { ListsPanel } from '@/features/tasks/components/ListsPanel';
 import { useReminders } from '@/features/tasks/useReminders';
 import { Toasts } from '@/ui/Toasts';
+import { ScreenTransition } from '@/ui/ScreenTransition';
+import { Onboarding } from '@/features/onboarding/Onboarding';
+import { useAchievementWatcher } from '@/features/progression/useAchievementWatcher';
 import { FloatingNumbers } from '@/features/progression/FloatingNumbers';
 import { LevelUpOverlay } from '@/features/progression/LevelUpOverlay';
 import { DamageFx, GameOverOverlay, NightReportDialog, useDayCycle } from '@/features/progression/DayOverlays';
@@ -24,6 +29,9 @@ function activeNavIndex(pathname: string) {
 function Sidebar() {
   const { pathname } = useLocation();
   const nav = useMenuNavigation({ count: mainNav.length, initialIndex: activeNavIndex(pathname) });
+  const { setActiveIndex } = nav;
+  // O cursor acompanha a seção atual quando a rota muda por outro caminho (links, abas mobile).
+  useEffect(() => setActiveIndex(activeNavIndex(pathname), false), [pathname, setActiveIndex]);
   return (
     <Window as="nav" aria-label={t('nav.main')}>
       <ul className="flex flex-col gap-0.5" onKeyDown={nav.onKeyDown}>
@@ -81,6 +89,7 @@ export function AppLayout() {
   const needsHero = useGameStore((s) => !s.character.name);
   useReminders();
   useDayCycle();
+  useAchievementWatcher();
   // Primeiro acesso: criação de personagem obrigatória (o /dev fica liberado).
   if (needsHero && !pathname.startsWith('/dev')) return <Navigate to="/criar" replace />;
   return (
@@ -104,16 +113,20 @@ export function AppLayout() {
           </div>
         </aside>
         <main id="conteudo" tabIndex={-1} className="min-w-0 flex-1 outline-none">
-          <Outlet />
+          <Suspense fallback={<PageLoading />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
       <BottomTabs />
+      <ScreenTransition />
       <Toasts />
       <FloatingNumbers />
       <DamageFx />
       <LevelUpOverlay />
       <NightReportDialog />
       <GameOverOverlay />
+      <Onboarding />
     </div>
   );
 }

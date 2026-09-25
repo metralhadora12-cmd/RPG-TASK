@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { createId } from '@/lib/id';
+import { emitSfx } from '@/lib/sfxBus';
 
 export type FloatKind = 'xp' | 'gold' | 'critical' | 'damage' | 'heal' | 'coin';
 
@@ -33,6 +34,7 @@ export const useFxStore = create<FxState>(() => ({ floats: [], levelUp: null, hi
 
 /** Tremida da tela e flash vermelho ao sofrer dano. */
 export function hitScreen(): void {
+  emitSfx('damage');
   useFxStore.setState((s) => ({ hitKey: s.hitKey + 1 }));
 }
 
@@ -60,6 +62,7 @@ export function removeFloat(id: string): void {
 
 /** Chuva de moedas saindo de um ponto (compras). */
 export function spawnCoins(origin: { x: number; y: number }, count = 8): void {
+  emitSfx('purchase');
   const coins = Array.from({ length: count }, (_, i) => ({
     id: createId(),
     kind: 'coin' as const,
@@ -74,6 +77,7 @@ export function spawnCoins(origin: { x: number; y: number }, count = 8): void {
 
 /** Enfileira um level up (se já houver um aberto, junta os ganhos). */
 export function showLevelUp(info: LevelUpInfo): void {
+  emitSfx('levelUp');
   useFxStore.setState((s) => ({
     levelUp: s.levelUp
       ? {

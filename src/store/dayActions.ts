@@ -91,6 +91,7 @@ export function createDayActions(set: StoreSet, get: StoreGet): DayActions {
           xpEarned: s.lifetime.xpEarned + event.xp,
           goldEarned: s.lifetime.goldEarned + event.gold,
           criticals: s.lifetime.criticals + (reward.critical ? 1 : 0),
+          habitUps: s.lifetime.habitUps + 1,
         },
       }));
       return {
@@ -129,6 +130,7 @@ export function createDayActions(set: StoreSet, get: StoreGet): DayActions {
         character,
         rewardLog: log(s, event, ...(faint ? [faintEvent(faint, now)] : [])),
         pendingFaint: faint ?? s.pendingFaint,
+        lifetime: faint ? { ...s.lifetime, faints: s.lifetime.faints + 1 } : s.lifetime,
       }));
       return { eventId: event.id, hpLost, faint };
     },
@@ -160,6 +162,7 @@ export function createDayActions(set: StoreSet, get: StoreGet): DayActions {
                   xpEarned: Math.max(0, s.lifetime.xpEarned - event.xp),
                   goldEarned: Math.max(0, s.lifetime.goldEarned - event.gold),
                   criticals: Math.max(0, s.lifetime.criticals - (event.critical ? 1 : 0)),
+                  habitUps: Math.max(0, s.lifetime.habitUps - 1),
                 }
               : s.lifetime,
         };
@@ -212,6 +215,7 @@ export function createDayActions(set: StoreSet, get: StoreGet): DayActions {
         rewardLog: log(s, ...events),
         pendingReport: worthShowing ? report : s.pendingReport,
         pendingFaint: hit.faint ?? s.pendingFaint,
+        lifetime: hit.faint ? { ...s.lifetime, faints: s.lifetime.faints + 1 } : s.lifetime,
       }));
       return worthShowing ? report : null;
     },

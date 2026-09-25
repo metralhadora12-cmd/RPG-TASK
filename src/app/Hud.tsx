@@ -54,14 +54,12 @@ export function Hud() {
           <Bar kind="mp" label={t('hud.mp')} value={character.mp} max={maxMp(level)} />
           <Bar kind="xp" label={t('hud.xp')} value={character.xp} max={xpToNextLevel(level)} />
         </div>
-        <p
-          className="flex items-center gap-2 tabular-nums text-shadow-pixel"
-          aria-label={t('hud.goldLabel', { amount: character.gold })}
-        >
+        <p className="flex items-center gap-2 tabular-nums text-shadow-pixel">
           <PixelIcon matrix={COIN} colors={COIN_COLORS} scale={3} />
           <span aria-hidden>
             <Bump value={character.gold}>{character.gold}</Bump> {t('hud.gold')}
           </span>
+          <span className="sr-only">{t('hud.goldLabel', { amount: character.gold })}</span>
         </p>
       </div>
     </header>

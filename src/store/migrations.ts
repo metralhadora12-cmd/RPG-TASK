@@ -9,7 +9,7 @@ import type { PersistedState } from './useGameStore';
  * Versão atual do estado persistido. Ao mudar o formato do estado:
  * incremente, adicione um passo em `steps` e um teste em `migrations.test.ts`.
  */
-export const STORE_VERSION = 5;
+export const STORE_VERSION = 6;
 
 type Step = (state: Record<string, unknown>) => Record<string, unknown>;
 
@@ -71,6 +71,12 @@ const steps: Record<number, Step> = {
           : character,
     };
   },
+  // v5 → v6: conquistas (novos contadores) e onboarding (quem já jogava não precisa ver).
+  5: (state) => ({
+    ...state,
+    lifetime: { ...defaultLifetime(), ...(state.lifetime as object | undefined) },
+    onboardingDone: state.onboardingDone ?? Boolean((state.character as Character | null | undefined)?.name),
+  }),
 };
 
 export function migrate(persisted: unknown, fromVersion: number): PersistedState {

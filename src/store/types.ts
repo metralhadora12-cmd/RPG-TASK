@@ -161,6 +161,8 @@ export interface LifetimeStats {
   bestStreak: number;
   goldSpent: number;
   itemsBought: number;
+  faints: number;
+  habitUps: number;
 }
 
 export type ReducedMotionPref = 'system' | 'on' | 'off';

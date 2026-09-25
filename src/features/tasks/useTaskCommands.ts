@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { formatDay } from '@/lib/date';
 import { t } from '@/lib/i18n';
+import { emitSfx } from '@/lib/sfxBus';
 import { useGameStore } from '@/store/useGameStore';
 import { showToast } from '@/ui/toastStore';
 import { hitScreen, originOf, showLevelUp, spawnFloats } from '@/features/progression/fxStore';
@@ -17,6 +18,8 @@ interface RewardFx {
 
 /** Números flutuantes de XP/Gold (e crítico) + tela de level up. */
 function celebrate(reward: RewardFx, origin?: Element | null) {
+  // O jingle de level up já toca sozinho; o resto ganha o som de conclusão.
+  if (reward.levelsGained === 0) emitSfx(reward.critical ? 'coins' : 'complete');
   spawnFloats(originOf(origin), [
     ...(reward.critical ? [{ kind: 'critical' as const, text: t('progress.critical') }] : []),
     { kind: 'xp', text: t('progress.xp', { n: reward.xp }) },

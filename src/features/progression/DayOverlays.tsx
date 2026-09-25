@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useToday } from '@/features/tasks/useToday';
 import { formatDay } from '@/lib/date';
 import { t } from '@/lib/i18n';
+import { emitSfx } from '@/lib/sfxBus';
 import { HeroSprite } from '@/features/shop/HeroSprite';
 import { useGameStore } from '@/store/useGameStore';
 import type { NightReport } from '@/store/types';
@@ -113,6 +114,7 @@ export function GameOverOverlay() {
 
   useEffect(() => {
     if (!visible) return;
+    emitSfx('faint');
     const timer = window.setTimeout(() => buttonRef.current?.focus(), reduced ? 0 : 900);
     return () => window.clearTimeout(timer);
   }, [visible, reduced]);

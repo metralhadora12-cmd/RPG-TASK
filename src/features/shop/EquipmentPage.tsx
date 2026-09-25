@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { spawnFloats } from '@/features/progression/fxStore';
 import { t, type MessageKey } from '@/lib/i18n';
+import { emitSfx } from '@/lib/sfxBus';
 import { useGameStore } from '@/store/useGameStore';
 import type { Slot } from '@/store/types';
 import { Button } from '@/ui/Button';
@@ -55,6 +56,7 @@ export function EquipmentPage() {
   const drink = (el: HTMLElement) => {
     const healed = useGameStore.getState().usePotion();
     if (healed > 0) {
+      emitSfx('heal');
       const r = el.getBoundingClientRect();
       spawnFloats({ x: r.left + r.width / 2, y: r.top }, [{ kind: 'heal', text: `+${healed} HP` }]);
       showToast({ message: t('equip.potionUsed', { n: healed }) });

@@ -435,6 +435,25 @@
   }
 }
 
+@keyframes stripe-out {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+.screen-stripe {
+  background: var(--backdrop);
+  transform-origin: left center;
+  animation-name: stripe-out;
+  animation-timing-function: steps(6, end);
+  animation-fill-mode: both;
+}
+.screen-stripe:nth-child(even) {
+  transform-origin: right center;
+}
+
 @keyframes damage-flash {
   from {
     opacity: 0.45;

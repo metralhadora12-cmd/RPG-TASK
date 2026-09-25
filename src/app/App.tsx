@@ -3,12 +3,14 @@ import { RouterProvider } from 'react-router-dom';
 import { t } from '@/lib/i18n';
 import { useGameStore } from '@/store/useGameStore';
 import { Window } from '@/ui/Window';
+import { useAudio } from '@/features/audio/useAudio';
 import { createAppRouter } from './router';
 import { SettingsEffects } from './SettingsEffects';
 
 export function App() {
   const hydrated = useGameStore((s) => s.hydrated);
   const router = useMemo(createAppRouter, []);
+  useAudio();
   return (
     <>
       <SettingsEffects />

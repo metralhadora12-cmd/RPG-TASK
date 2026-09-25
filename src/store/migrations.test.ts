@@ -54,6 +54,12 @@ describe('migrate', () => {
     expect(classic.character.inventory).toEqual([]);
   });
 
+  it('v5 → v6: onboarding só para quem ainda não tem herói', () => {
+    expect(migrate({ character: { name: 'A' }, lifetime: {} }, 5).onboardingDone).toBe(true);
+    expect(migrate({ character: { name: '' }, lifetime: {} }, 5).onboardingDone).toBe(false);
+    expect(migrate({ lifetime: { faints: 2 } }, 5).lifetime).toMatchObject({ faints: 2, habitUps: 0 });
+  });
+
   it('não altera um save que já está na versão atual', () => {
     const save = { settings: defaultSettings, tasks: [{ id: 'x' }] };
     expect(migrate(save, STORE_VERSION)).toBe(save);

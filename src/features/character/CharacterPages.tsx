@@ -1,7 +1,9 @@
 import { useRef, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { maxHp, maxMp, xpToNextLevel } from '@/features/progression/formulas';
-import { t } from '@/lib/i18n';
+import { t, type MessageKey } from '@/lib/i18n';
+import { achievements } from '@/features/progression/achievements';
+import { Medal } from '@/features/progression/Medal';
 import { HeroSprite } from '@/features/shop/HeroSprite';
 import { HeroStage } from '@/features/shop/HeroStage';
 import type { CharacterPose } from '@/sprites/CharacterSprite';
@@ -172,8 +174,23 @@ export function StatusPage() {
           </dl>
         </Window>
 
-        <Window title={t('status.achievements')}>
-          <p className="text-win-dim">{t('status.achievementsSoon')}</p>
+        <Window title={`${t('status.achievements')} · ${t('ach.count', { n: character.achievements.length, total: achievements.length })}`}>
+          <ul className="grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-3">
+            {achievements.map((a) => {
+              const unlocked = character.achievements.includes(a.id);
+              return (
+                <li key={a.id} className="flex items-start gap-2" aria-label={`${t(`ach.${a.id}` as MessageKey)}: ${unlocked ? t(`ach.tier.${a.tier}`) : t('ach.locked')}. ${t(`ach.${a.id}.desc` as MessageKey)}`}>
+                  <span className="shrink-0">
+                    <Medal achievement={a} unlocked={unlocked} scale={3} />
+                  </span>
+                  <span className={unlocked ? '' : 'opacity-60'} aria-hidden>
+                    <span className="block leading-tight text-shadow-pixel">{t(`ach.${a.id}` as MessageKey)}</span>
+                    <span className="block text-base leading-tight text-win-dim">{t(`ach.${a.id}.desc` as MessageKey)}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
         </Window>
       </div>
     </div>

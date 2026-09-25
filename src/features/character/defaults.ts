@@ -24,5 +24,5 @@ export function defaultCharacter(): Character {
 }
 
 export function defaultLifetime(): LifetimeStats {
-  return { tasksCompleted: 0, xpEarned: 0, goldEarned: 0, criticals: 0, bestStreak: 0, goldSpent: 0, itemsBought: 0 };
+  return { tasksCompleted: 0, xpEarned: 0, goldEarned: 0, criticals: 0, bestStreak: 0, goldSpent: 0, itemsBought: 0, faints: 0, habitUps: 0 };
 }

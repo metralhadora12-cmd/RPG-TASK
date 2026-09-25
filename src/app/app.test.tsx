@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -79,5 +79,36 @@ describe('App', () => {
   it('mostra página de caminho perdido para rotas desconhecidas', async () => {
     renderAt('/nao-existe');
     expect(await screen.findByRole('heading', { name: 'Caminho perdido' })).toBeInTheDocument();
+  });
+});
+
+describe('backup nas configurações', () => {
+  beforeEach(() => {
+    useGameStore.setState(heroState());
+  });
+
+  it('importa um arquivo de backup após confirmação', async () => {
+    const user = userEvent.setup();
+    renderAt('/menu');
+    const backup = {
+      app: 'questlog',
+      version: 6,
+      exportedAt: '2026-09-25T00:00:00.000Z',
+      state: { ...heroState(), character: { ...useGameStore.getState().character, name: 'Bento', level: 7 } },
+    };
+    const file = new File([JSON.stringify(backup)], 'b.json', { type: 'application/json' });
+    await user.upload(screen.getByLabelText('Importar backup', { selector: 'input' }), file);
+    const dialog = await screen.findByRole('dialog', { name: 'Importar backup' });
+    expect(dialog).toHaveTextContent('backup de Bento (nível 7)');
+    await user.click(within(dialog).getByRole('button', { name: 'Sim' }));
+    expect(useGameStore.getState().character).toMatchObject({ name: 'Bento', level: 7 });
+  });
+
+  it('avisa quando o arquivo não é um backup', async () => {
+    const user = userEvent.setup();
+    renderAt('/menu');
+    const file = new File(['oops'], 'x.json', { type: 'application/json' });
+    await user.upload(screen.getByLabelText('Importar backup', { selector: 'input' }), file);
+    expect(await screen.findByText('Arquivo inválido: não parece um backup do QuestLog.')).toBeInTheDocument();
   });
 });

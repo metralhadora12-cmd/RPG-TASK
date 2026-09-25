@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { defaultSettings } from './defaults';
 import { createShopActions, type ShopActions } from './shopActions';
+import { persistedPart } from './backup';
 import { createDayActions, type DayActions } from './dayActions';
 import { createCharacterActions, type CharacterActions } from './characterActions';
 import { createListActions, inboxList, type ListActions } from './listActions';
@@ -25,6 +26,8 @@ export interface PersistedState {
   pendingReport: NightReport | null;
   /** Tela de desmaio ainda não vista. */
   pendingFaint: FaintInfo | null;
+  /** Onboarding do mentor já visto. */
+  onboardingDone: boolean;
   /** Ordenação escolhida por visão ("my-day", "list:<id>", ...). */
   viewPrefs: Record<string, SortMode>;
 }
@@ -33,6 +36,10 @@ export interface GameState extends PersistedState, TaskActions, ListActions, Cha
   /** Verdadeiro após carregar o save do IndexedDB. */
   hydrated: boolean;
   updateSettings: (patch: Partial<Settings>) => void;
+  unlockAchievements: (ids: string[]) => void;
+  finishOnboarding: () => void;
+  /** Substitui todo o progresso por um backup já migrado. */
+  importSave: (state: PersistedState) => void;
   resetProgress: () => void;
 }
 
@@ -50,6 +57,7 @@ export function initialPersistedState(): PersistedState {
     lifetime: defaultLifetime(),
     pendingReport: null,
     pendingFaint: null,
+    onboardingDone: false,
     viewPrefs: {},
   };
 }
@@ -65,6 +73,15 @@ export const useGameStore = create<GameState>()(
       ...createDayActions(set, get),
       ...createShopActions(set, get),
       updateSettings: (patch) => set((s) => ({ settings: { ...s.settings, ...patch } })),
+      unlockAchievements: (ids) =>
+        set((s) => ({
+          character: {
+            ...s.character,
+            achievements: [...s.character.achievements, ...ids.filter((id) => !s.character.achievements.includes(id))],
+          },
+        })),
+      finishOnboarding: () => set({ onboardingDone: true }),
+      importSave: (state) => set({ ...initialPersistedState(), ...state }),
       resetProgress: () =>
         set((s) => ({
           ...initialPersistedState(),
@@ -77,18 +94,7 @@ export const useGameStore = create<GameState>()(
       version: STORE_VERSION,
       storage: createJSONStorage(() => idbStorage),
       migrate,
-      partialize: (s): PersistedState => ({
-        settings: s.settings,
-        character: s.character,
-        lists: s.lists,
-        groups: s.groups,
-        tasks: s.tasks,
-        rewardLog: s.rewardLog,
-        lifetime: s.lifetime,
-        pendingReport: s.pendingReport,
-        pendingFaint: s.pendingFaint,
-        viewPrefs: s.viewPrefs,
-      }),
+      partialize: (s: GameState): PersistedState => persistedPart(s),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<PersistedState>;
         return {

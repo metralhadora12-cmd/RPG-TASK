@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { emitSfx } from '@/lib/sfxBus';
 
 export interface MenuNavigationOptions {
   count: number;
@@ -39,12 +40,18 @@ export function useMenuNavigation({
     if (activeIndex > count - 1) setActiveIndex(Math.max(0, count - 1));
   }, [count, activeIndex]);
 
+  const activeRef = useRef(activeIndex);
+  activeRef.current = activeIndex;
+
   const moveTo = useCallback(
     (index: number, focus = focusOnMove) => {
-      setActiveIndex((prev) => {
-        if (index !== prev) onMove?.(index);
-        return index;
-      });
+      if (index !== activeRef.current) {
+        activeRef.current = index;
+        onMove?.(index);
+        // Som de cursor só em movimentos de teclado (passar o mouse seria barulhento).
+        if (focus) emitSfx('cursor');
+      }
+      setActiveIndex(index);
       if (focus) itemRefs.current[index]?.focus();
     },
     [focusOnMove, onMove],
@@ -97,6 +104,7 @@ export function useMenuNavigation({
           // Sem onSelect, deixa o comportamento nativo (ex.: Enter em links).
           if (onSelect && !isDisabled?.(activeIndex)) {
             e.preventDefault();
+            emitSfx('confirm');
             onSelect?.(activeIndex);
           }
           return;
@@ -104,6 +112,7 @@ export function useMenuNavigation({
           if (onCancel) {
             e.preventDefault();
             e.stopPropagation();
+            emitSfx('cancel');
             onCancel();
           }
           return;
@@ -134,6 +143,7 @@ export function useMenuNavigation({
       onClick: () => {
         if (!isDisabled?.(index)) {
           moveTo(index, false);
+          if (onSelect) emitSfx('confirm');
           onSelect?.(index);
         }
       },
