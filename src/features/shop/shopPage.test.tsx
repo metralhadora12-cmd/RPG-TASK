@@ -1,4 +1,4 @@
-import { act, render, screen, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -67,10 +67,9 @@ describe('loja', () => {
     await user.click(screen.getByRole('button', { name: /^Bandana Rubra/ }));
     await user.click(screen.getByRole('button', { name: 'Comprar' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    await act(async () => {
-      vi.useRealTimers();
-    });
-    expect(await screen.findByText('Hmm... parece que falta ouro na sua bolsa.', {}, { timeout: 3000 })).toBeInTheDocument();
+    // A fala completa já está disponível para leitores de tela enquanto é "digitada":
+    // o teste não depende do relógio (antes esperava a digitação em tempo real e oscilava sob carga).
+    expect(await screen.findByText('Hmm... parece que falta ouro na sua bolsa.')).toBeInTheDocument();
     expect(store().character.inventory).toEqual([]);
   });
 });

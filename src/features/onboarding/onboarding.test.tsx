@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -26,7 +26,9 @@ describe('onboarding', () => {
   it('pode ser pulado com Esc', async () => {
     const user = userEvent.setup();
     render(<RouterProvider router={createMemoryRouter(routes, { initialEntries: ['/missoes/meu-dia'] })} />);
-    await screen.findByRole('dialog', { name: 'Sábia Lúmen (1/3)' });
+    const dialog = await screen.findByRole('dialog', { name: 'Sábia Lúmen (1/3)' });
+    // O foco entra no diálogo no próximo quadro; só então o Esc chega a ele.
+    await waitFor(() => expect(dialog).toContainElement(document.activeElement as HTMLElement));
     await user.keyboard('{Escape}');
     expect(useGameStore.getState().onboardingDone).toBe(true);
   });

@@ -51,18 +51,21 @@ describe('paletas', () => {
   const poses: Pose[] = ['idle0', 'idle1', 'victory', 'fainted'];
 
   it('toda chave usada em cada camada tem cor na paleta daquela camada', () => {
+    const missing = new Set<string>();
     for (const classId of classIds) {
       for (let outfit = 0; outfit < 3; outfit++) {
         for (let hairStyle = 0; hairStyle < hairStyles.length; hairStyle++) {
           for (const pose of poses) {
             for (const { layer } of characterLayers(look({ outfit, hairStyle }, classId), pose)) {
-              for (const row of layer.rows)
-                for (const ch of row) if (ch !== '.') expect(layer.palette[ch], `${layer.id} usa "${ch}"`).toBeDefined();
+              for (const ch of new Set(layer.rows.join(''))) {
+                if (ch !== '.' && !layer.palette[ch]) missing.add(`${layer.id} usa "${ch}"`);
+              }
             }
           }
         }
       }
     }
+    expect([...missing]).toEqual([]);
   });
 
   it('trocar a cor do cabelo recolore só o cabelo', () => {
