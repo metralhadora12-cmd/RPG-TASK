@@ -33,15 +33,15 @@ describe('criação de personagem', () => {
     await user.keyboard('{ArrowRight}{ArrowRight}'); // Mago → Ladino
     expect(screen.getByRole('button', { name: /^Classe: Ladino/ })).toBeInTheDocument();
     expect(screen.getByText('+20% Gold')).toBeInTheDocument();
-    await user.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}{ArrowLeft}'); // Cabelo ◂ → Careca
-    expect(screen.getByRole('button', { name: 'Cabelo: Careca' })).toBeInTheDocument();
+    // Cada classe tem arte própria: não há mais opções de cabelo/pele/roupa.
+    expect(screen.queryByRole('button', { name: /^Cabelo:/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /Kaelthas Max — Ladino/ })).toBeInTheDocument();
     await user.keyboard('{End}{Enter}');
 
     expect(store().character).toMatchObject({
       name: 'Kaelthas Max',
       classId: 'rogue',
       stats: classBaseStats.rogue,
-      appearance: { hairStyle: 9 },
     });
     expect(router.state.location.pathname).toBe('/missoes/meu-dia');
   });
@@ -58,8 +58,8 @@ describe('criação de personagem', () => {
   it('as setas ▴ ▾ mudam as opções com o mouse', async () => {
     const user = userEvent.setup();
     renderAt('/criar');
-    await user.click(await screen.findByRole('button', { name: 'Próximo: Cor do cabelo' }));
-    expect(screen.getByRole('button', { name: /^Cor do cabelo: Castanho-escuro/ })).toBeInTheDocument();
+    await user.click(await screen.findByRole('button', { name: 'Próximo: Classe' }));
+    expect(screen.getByRole('button', { name: /^Classe: Mago/ })).toBeInTheDocument();
   });
 });
 
@@ -85,7 +85,7 @@ describe('status e aparência', () => {
     expect(within(stats).getByText('42')).toBeInTheDocument();
   });
 
-  it('aparência: classe travada antes do nível 10; muda cabelo e salva', async () => {
+  it('aparência: classe travada antes do nível 10; muda o nome e salva', async () => {
     const user = userEvent.setup();
     const router = renderAt('/personagem/aparencia');
     const cls = await screen.findByRole('button', { name: /^Classe: Guerreiro/ });
@@ -93,9 +93,11 @@ describe('status e aparência', () => {
     cls.focus();
     await user.keyboard('{ArrowRight}');
     expect(screen.getByRole('button', { name: /^Classe: Guerreiro/ })).toBeInTheDocument();
-    await user.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}{ArrowDown}{ArrowRight}'); // cor do cabelo
+    const name = screen.getByLabelText('Nome');
+    await user.clear(name);
+    await user.type(name, 'Lina');
     await user.click(screen.getByRole('button', { name: 'Salvar' }));
-    expect(store().character.appearance.hairColor).toBe(1);
+    expect(store().character.name).toBe('Lina');
     expect(store().character.classId).toBe('warrior');
     expect(router.state.location.pathname).toBe('/personagem');
   });

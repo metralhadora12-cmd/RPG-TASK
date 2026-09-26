@@ -10,7 +10,7 @@ import {
   hairStyles,
   skinTones,
 } from '@/sprites/characterParts';
-import { CharacterSprite } from '@/sprites/CharacterSprite';
+import { HeroArt } from '@/sprites/HeroArt';
 import { NAME_MAX_LENGTH, REINCARNATION_LEVEL } from '@/store/characterActions';
 import type { Appearance, ClassId } from '@/store/types';
 import { CursorSlot } from '@/ui/Cursor';
@@ -24,7 +24,8 @@ import { statKeys } from './stats';
 type CycleId = 'class' | 'body' | 'skin' | 'hairStyle' | 'hairColor' | 'eyes' | 'outfit';
 type RowId = 'name' | CycleId | 'random' | 'confirm';
 
-const ROWS: RowId[] = ['name', 'class', 'body', 'skin', 'hairStyle', 'hairColor', 'eyes', 'outfit', 'random', 'confirm'];
+/** Cada classe tem um herói com arte própria: a criação escolhe nome e classe. */
+const ROWS: RowId[] = ['name', 'class', 'random', 'confirm'];
 
 const rowLabel: Record<CycleId, MessageKey> = {
   class: 'character.class',
@@ -269,10 +270,10 @@ export function CharacterEditor({ mode, initial, level, onConfirm, onCancel }: C
       <div className="flex min-w-0 flex-col gap-4">
         <Window title={t('character.preview')}>
           <div className="stage flex justify-center">
-            <CharacterSprite
-              look={{ appearance, classId }}
+            <HeroArt
+              classId={classId}
               pose={celebrate ? 'victory' : 'idle'}
-              scale={4}
+              scale={3.5}
               label={`${draft.name || t('hud.noHero')} — ${t(`class.${classId}`)}`}
             />
           </div>

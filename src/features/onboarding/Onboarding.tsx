@@ -1,18 +1,11 @@
-import { useMemo, useState } from 'react';
-import { equipmentFor } from '@/features/shop/equipment';
+import { useState } from 'react';
 import { t } from '@/lib/i18n';
-import { CharacterSprite } from '@/sprites/CharacterSprite';
-import type { CharacterLook } from '@/sprites/compose';
+import { HeroArt } from '@/sprites/HeroArt';
 import { useGameStore } from '@/store/useGameStore';
 import { useFxStore } from '@/features/progression/fxStore';
 import { Dialog } from '@/ui/Dialog';
 
-/** Lúmen, a mentora (NPC original montado com peças do jogo). */
-const mentorLook: CharacterLook = {
-  classId: 'mage',
-  appearance: { body: 'a', skin: 1, hairStyle: 3, hairColor: 7, eyes: 4, outfit: 1 },
-};
-const MENTOR_ITEMS = { hat: 'hat-wizard-astral', weapon: 'wpn-staff-arcane', armor: 'armor-oracle' };
+/** Lúmen, a mentora: usa a arte da clériga. */
 
 const STEPS = ['mentor.1', 'mentor.2', 'mentor.3'] as const;
 
@@ -23,7 +16,6 @@ export function Onboarding() {
   const finish = useGameStore((s) => s.finishOnboarding);
   const busy = useFxStore((s) => Boolean(s.levelUp));
   const [step, setStep] = useState(0);
-  const equipment = useMemo(() => equipmentFor(MENTOR_ITEMS), []);
   if (!show || busy) return null;
 
   const last = step === STEPS.length - 1;
@@ -36,7 +28,7 @@ export function Onboarding() {
       text={t(STEPS[step]!, { name })}
       portrait={
         <div className="stage">
-          <CharacterSprite look={mentorLook} equipment={equipment} scale={2} label={t('mentor.name')} />
+          <HeroArt classId="cleric" scale={2} label={t('mentor.name')} />
         </div>
       }
       actions={[

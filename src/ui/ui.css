@@ -368,6 +368,14 @@
     border-radius: 3px;
   }
 
+  /* ---------- Herói (arte fixa por classe) ---------- */
+  .hero-breathe {
+    animation: hero-breathe 1.04s steps(1) infinite;
+  }
+  .hero-hop {
+    animation: hero-hop 0.6s steps(3) infinite;
+  }
+
   /* ---------- Palco do sprite ---------- */
   .stage {
     padding: 12px 8px 6px;
@@ -483,4 +491,14 @@
 }
 :root.reduce-motion .px-bar-fill {
   transition: none;
+}
+
+@keyframes hero-breathe {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(2px) scaleY(0.99); }
+}
+
+@keyframes hero-hop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8%); }
 }

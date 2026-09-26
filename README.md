@@ -98,6 +98,8 @@ O app é empacotado com o [Capacitor](https://capacitorjs.com) (pasta `android/`
 
 ### Fase 4 — Personagem
 
+- **Heróis por classe (arte do SpriteCook)**: cada classe tem um herói chibi inspirado em Disgaea, gerado com o SpriteCook para o QuestLog (`src/assets/heroes/`, mapa em `src/sprites/heroArt.ts`). O componente `HeroArt` mostra o herói no HUD (busto), Status, Loja, Equipamento, Game Over e na mentora; poses: parado (respiração), vitória (pulinho) e desmaiado (deitado). O mascote equipado aparece ao lado. A criação de personagem escolhe nome e classe. Chapéus, roupas, armas e acessórios são cosméticos de coleção: aparecem no ícone e na prévia da loja, sem mudar o boneco.
+- O sistema procedural em camadas abaixo continua no código (mercador, mascotes e `/dev/sprites`).
 - **Sprites de JRPG 32-bit em camadas** (`src/sprites/`): herói de 64×64 em **vista 3/4 voltada para a direita**, em pose de combate (pernas afastadas, arma na mão da frente, punho de trás em guarda), com cabelo espetado de anime e rosto com olhos grandes.
   - Cada parte é uma matriz de chaves de paleta escrita como texto em `layerData.ts` e `itemData.ts`. A arte foi gerada por scripts (formas, sombreamento pela direção da luz e retoques pixel a pixel) e exportada como texto.
   - Cada material tem 4 tons (luz · base · sombra · sombra profunda). As paletas definem só a base; `palette.ts` deriva o resto com **desvio de matiz** (sombras puxam para o vermelho/roxo, luzes para o amarelo), como nos sprites da era 32 bits.

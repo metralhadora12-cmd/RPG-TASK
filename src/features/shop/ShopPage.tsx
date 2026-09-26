@@ -221,7 +221,14 @@ export function ShopPage() {
                 </div>
               ) : (
                 <HeroStage equipped={previewEquipped} scale={4} width={256}>
-                  <HeroSprite equipped={previewEquipped} scale={2} />
+                  <span className="flex items-end gap-3">
+                    <HeroSprite equipped={previewEquipped} scale={2} />
+                    {selected.category !== 'background' && selected.category !== 'pet' ? (
+                      <span className="mb-2">
+                        <ItemIcon item={selected} scale={2} />
+                      </span>
+                    ) : null}
+                  </span>
                 </HeroStage>
               )}
               <div>
