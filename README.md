@@ -42,7 +42,8 @@ O app é empacotado com o [Capacitor](https://capacitorjs.com) (pasta `android/`
 
 ### Chefe da semana
 
-- Toda semana aparece um chefe (Rei Gosma, Dragão da Preguiça, Fantasma do Prazo e Gato do Caos, em rodízio). A semana começa no dia configurado em Menu.
+- Toda semana aparece um chefe (Demônio Rubro e Monstro de Sangue, em rodízio). A semana começa no dia configurado em Menu.
+- Os chefes são animados: ficam parados em loop, mostram a animação de dano a cada golpe e a de morte quando derrotados (ficam caídos até a semana virar).
 - Concluir missões e rotinas, ou apertar "+" num hábito, tira HP dele. O crítico dobra o golpe. Um número flutuante mostra o dano.
 - Desfazer a tarefa devolve o HP ao chefe. Quando ele cai, o herói ganha XP e Gold uma única vez: essa vitória é um evento à parte e não é desfeita junto com a tarefa.
 - O painel aparece na tela de Status e, compacto, na barra lateral das Missões. Derrotar o primeiro chefe dá a conquista "Caçador de Chefes".
@@ -279,3 +280,10 @@ Desmaio (HP ≤ 0): o XP do nível atual vai a 0, perde `floor(10% do Gold)` e o
 | Pontos por nível | 2 |
 
 O progresso é guardado como nível + XP no nível. Para aplicar ou desfazer, ele é convertido em XP total acumulado. Assim, desfazer várias conclusões em qualquer ordem volta exatamente ao estado inicial, o que é testado como propriedade com sequências aleatórias.
+
+## Créditos
+
+- Chefes da semana (Demon_A e Blood Monster_A): **Tiny RPG Character Asset Pack 02 — Free**, pacote de terceiros usado conforme a licença do autor (`src/assets/bosses/`).
+- Heróis por classe: arte gerada com o SpriteCook para o QuestLog (`src/assets/heroes/`).
+- Todo o resto (interface, itens, cenários, sons) é original, feito em código.
+

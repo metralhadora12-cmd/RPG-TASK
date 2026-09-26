@@ -502,3 +502,9 @@
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8%); }
 }
+
+/* Tira de quadros (chefes): anda do primeiro ao último quadro. */
+@keyframes boss-strip {
+  from { background-position-x: 0; }
+  to { background-position-x: var(--strip-w); }
+}
