@@ -1,4 +1,6 @@
 import { useMemo } from 'react';
+import { StripSprite } from '@/sprites/StripSprite';
+import { PET_ART, PET_FRAME } from './petArt';
 import { outfitShapes } from '@/sprites/characterParts';
 import { itemPalette, outfitPalette, paintLayers } from '@/sprites/compose';
 import { expandLayer } from '@/sprites/layers';
@@ -29,6 +31,14 @@ function bounds(...layers: (readonly string[])[]) {
 
 /** Ícone do item para a vitrine (a própria arte recortada, uma miniatura ou uma amostra). */
 export function ItemIcon({ item, scale = 2 }: { item: ShopItem; scale?: number }) {
+  if (item.category === 'pet' && item.sprite) {
+    const { src, frames } = PET_ART[item.sprite].idle;
+    return <StripSprite src={src} frames={frames} frameWidth={PET_FRAME.width} frameHeight={PET_FRAME.height} scale={scale} still />;
+  }
+  return <ItemIconArt item={item} scale={scale} />;
+}
+
+function ItemIconArt({ item, scale }: { item: ShopItem; scale: number }) {
   const art = useMemo(() => {
     if ('art' in item) {
       const rows = expandLayer(item.art);

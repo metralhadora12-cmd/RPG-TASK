@@ -7,7 +7,7 @@ import { format, parseISO, startOfWeek } from 'date-fns';
 import { xpToNextLevel } from '@/features/progression/formulas';
 import type { Difficulty } from '@/store/types';
 
-export const BOSS_IDS = ['slime-king', 'sloth-dragon', 'clock-ghost', 'chaos-cat'] as const;
+export const BOSS_IDS = ['demon', 'blood-monster'] as const;
 export type BossId = (typeof BOSS_IDS)[number];
 
 /** Dano no chefe por dificuldade da tarefa. */
@@ -32,6 +32,10 @@ export function daysLeftInWeek(day: string, weekStartsOn: 0 | 1): number {
   const start = parseISO(weekKey(day, weekStartsOn)).getTime();
   const elapsed = Math.round((parseISO(day).getTime() - start) / 86_400_000);
   return 7 - elapsed;
+}
+
+export function isBossId(id: string): id is BossId {
+  return (BOSS_IDS as readonly string[]).includes(id);
 }
 
 /** O chefe da semana gira em ordem fixa (mesma semana = mesmo chefe). */

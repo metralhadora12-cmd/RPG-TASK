@@ -8,6 +8,7 @@ import type { LayerSource, SpritePalette } from '@/sprites/types';
 import type { Slot } from '@/store/types';
 import type { ThemeId } from '@/ui/palette';
 import type { BackgroundId } from './backgrounds';
+import type { PetSpriteId } from './petArt';
 
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 export const rarities: Rarity[] = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
@@ -34,6 +35,8 @@ export interface LayerItem extends BaseItem {
   hairClip?: number;
   /** Parte da frente (ex.: gola e fecho da capa), desenhada por cima do corpo. */
   front?: LayerSource;
+  /** Mascote com sprite animado (tiras em `petArt.ts`); `art` fica como reserva. */
+  sprite?: PetSpriteId;
 }
 
 export interface ArmorItem extends BaseItem {
@@ -113,7 +116,9 @@ export const catalog: ShopItem[] = [
   // Mascotes
   { id: 'pet-slime', category: 'pet', price: 60, rarity: 'common', minLevel: 1, art: A.petSlime, palette: { c: '#58c848', C: '#2e8028', w: '#d8ffd0', e: '#102010' } },
   { id: 'pet-chick', category: 'pet', price: 120, rarity: 'uncommon', minLevel: 2, art: A.petChick, palette: { c: '#f8d848', C: '#c8a020', a: '#f08820', e: '#101010' } },
-  { id: 'pet-cat', category: 'pet', price: 150, rarity: 'uncommon', minLevel: 4, art: A.petCat, palette: { c: '#e89040', C: '#a85a20', a: '#f8a0b0', e: '#203018' } },
+  { id: 'pet-cat', category: 'pet', price: 150, rarity: 'uncommon', minLevel: 4, art: A.petCat, sprite: 'cat-ginger', palette: { c: '#e89040', C: '#a85a20', a: '#f8a0b0', e: '#203018' } },
+  { id: 'pet-cat-black', category: 'pet', price: 180, rarity: 'uncommon', minLevel: 4, art: A.petCat, sprite: 'cat-black', palette: { c: '#4a4450', C: '#2a2630', a: '#f8a0b0', e: '#f0d040' } },
+  { id: 'pet-cat-white', category: 'pet', price: 360, rarity: 'rare', minLevel: 7, art: A.petCat, sprite: 'cat-white', palette: { c: '#d8d8e8', C: '#a0a0b8', a: '#f8a0b0', e: '#4060c0' } },
   { id: 'pet-ghost', category: 'pet', price: 320, rarity: 'rare', minLevel: 7, art: A.petGhost, palette: { c: '#f0f0ff', C: '#b8b8d8', w: '#ffffff', a: '#f8a0c0', e: '#303050' } },
   { id: 'pet-dragon', category: 'pet', price: 1000, rarity: 'legendary', minLevel: 15, art: A.petDragon, palette: { c: '#48b868', C: '#287840', a: '#f8d860', e: '#f83030' } },
 

@@ -1,12 +1,28 @@
-import { itemPalette } from '@/sprites/compose';
-import * as A from '@/sprites/itemData';
-import type { LayerSource, SpritePalette } from '@/sprites/types';
+import bloodDeath from '@/assets/bosses/blood-monster-death.png';
+import bloodHurt from '@/assets/bosses/blood-monster-hurt.png';
+import bloodIdle from '@/assets/bosses/blood-monster-idle.png';
+import demonDeath from '@/assets/bosses/demon-death.png';
+import demonHurt from '@/assets/bosses/demon-hurt.png';
+import demonIdle from '@/assets/bosses/demon-idle.png';
 import type { BossId } from './boss';
 
-/** Arte dos chefes: criaturas do jogo em versões sombrias (pixel art em código). */
-export const BOSS_ART: Record<BossId, { art: LayerSource; palette: SpritePalette }> = {
-  'slime-king': { art: A.petSlime, palette: itemPalette({ c: '#8a38c8', C: '#4a1878', w: '#e8c8ff', e: '#f8e040' }) },
-  'sloth-dragon': { art: A.petDragon, palette: itemPalette({ c: '#b83028', C: '#6a1010', a: '#f8a040', e: '#f8f040' }) },
-  'clock-ghost': { art: A.petGhost, palette: itemPalette({ c: '#6878b8', C: '#384070', w: '#c8d8ff', a: '#f84860', e: '#f8f040' }) },
-  'chaos-cat': { art: A.petCat, palette: itemPalette({ c: '#383048', C: '#1c1826', a: '#f84860', e: '#48f0a0' }) },
+/**
+ * Arte dos chefes: "Tiny RPG Character Asset Pack 02 (Free)" — Demon_A e Blood Monster_A.
+ * Cada animação é uma tira horizontal de quadros de 42×28 (recortados dos quadros 100×100 do pacote).
+ */
+export const BOSS_FRAME = { width: 42, height: 28 } as const;
+
+export type BossAnim = 'idle' | 'hurt' | 'death';
+
+export const BOSS_ART: Record<BossId, Record<BossAnim, { src: string; frames: number }>> = {
+  demon: {
+    idle: { src: demonIdle, frames: 6 },
+    hurt: { src: demonHurt, frames: 4 },
+    death: { src: demonDeath, frames: 4 },
+  },
+  'blood-monster': {
+    idle: { src: bloodIdle, frames: 6 },
+    hurt: { src: bloodHurt, frames: 4 },
+    death: { src: bloodDeath, frames: 4 },
+  },
 };
