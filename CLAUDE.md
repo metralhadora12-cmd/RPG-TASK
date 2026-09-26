@@ -10,7 +10,7 @@ Especificação do produto. Siga-a fase a fase (seção 10). Ao terminar cada fa
 - Componentes do design system em `src/ui/` (`Window`, `Button`, `Bar`, `Cursor`, `Dialog`, `Tabs`, `Menu`). Navegação por teclado via `useMenuNavigation`.
 - Store: `src/store/`. Toda mudança de formato do estado persistido incrementa `STORE_VERSION` e ganha um passo em `migrations.ts` com teste.
 - Fórmulas de jogo: funções puras em `src/features/progression/formulas.ts`, com testes.
-- Assets: pixel art gerada em código (`src/sprites/`) ou criada com a ferramenta **SpriteCook** para este projeto (design original, apenas *inspirado* em outros jogos). Pacotes de terceiros só com licença que permita o uso e com crédito na seção "Créditos" do README (hoje: chefes da semana, *Tiny RPG Character Asset Pack 02 — Free*). Nada copiado de jogos comerciais. Áudio via Web Audio.
+- Assets: pixel art gerada em código (`src/sprites/`) ou criada com a ferramenta **SpriteCook** para este projeto (design original, apenas *inspirado* em outros jogos). Pacotes de terceiros só com licença que permita o uso e com crédito na seção "Créditos" do README (hoje: chefes da semana, *Tiny RPG Character Asset Pack 02 — Free*, e os mascotes gatos). Nada copiado de jogos comerciais. Áudio via Web Audio.
 
 ---
 

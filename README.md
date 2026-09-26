@@ -284,6 +284,7 @@ O progresso é guardado como nível + XP no nível. Para aplicar ou desfazer, el
 ## Créditos
 
 - Chefes da semana (Demon_A e Blood Monster_A): **Tiny RPG Character Asset Pack 02 — Free**, pacote de terceiros usado conforme a licença do autor (`src/assets/bosses/`).
+- Mascotes Gato Laranja, Gato Preto e Gato Branco: pacote de gatos em pixel art 64×64 de terceiros (animações abanando o rabo, miando e dormindo), usado conforme a licença do autor (`src/assets/pets/`).
 - Heróis por classe: arte gerada com o SpriteCook para o QuestLog (`src/assets/heroes/`).
 - Todo o resto (interface, itens, cenários, sons) é original, feito em código.
 

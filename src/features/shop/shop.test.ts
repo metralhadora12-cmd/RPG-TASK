@@ -9,6 +9,7 @@ import { backgroundIds } from './backgrounds';
 import { catalog, categories, getItem, POTION_ID, rarities } from './catalog';
 import { equipmentFor } from './equipment';
 import { dailyOffers, hashString, priceFor } from './offers';
+import { PET_ART } from './petArt';
 
 describe('catálogo', () => {
   it('tem pelo menos 40 itens com ids únicos, em todas as categorias', () => {
@@ -48,6 +49,16 @@ describe('catálogo', () => {
           for (const ch of row) if (ch !== '.') expect(palette[ch], `${item.id} usa "${ch}"`).toBeDefined();
         }
       }
+    }
+  });
+
+  it('gatos animados têm as três animações (parado, vitória, dormindo)', () => {
+    const cats = catalog.filter((i) => i.category === 'pet' && i.sprite);
+    expect(cats.map((i) => i.id).sort()).toEqual(['pet-cat', 'pet-cat-black', 'pet-cat-white']);
+    for (const cat of cats) {
+      const art = PET_ART[(cat as { sprite: keyof typeof PET_ART }).sprite];
+      expect(Object.keys(art).sort()).toEqual(['idle', 'sleep', 'victory']);
+      for (const anim of Object.values(art)) expect(anim.frames).toBeGreaterThan(1);
     }
   });
 
