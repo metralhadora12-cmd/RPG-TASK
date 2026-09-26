@@ -48,5 +48,6 @@ export function persistedPart(s: PersistedState): PersistedState {
     pendingFaint: s.pendingFaint,
     onboardingDone: s.onboardingDone,
     viewPrefs: s.viewPrefs,
+    boss: s.boss,
   };
 }

@@ -44,6 +44,7 @@ export const achievements: Achievement[] = [
   { id: 'good-habits-50', tier: 'silver', ribbon: 'streak', check: ({ lifetime }) => lifetime.habitUps >= 50 },
   { id: 'survivor', tier: 'bronze', ribbon: 'misc', check: ({ lifetime }) => lifetime.faints >= 1 },
   { id: 'list-maker', tier: 'bronze', ribbon: 'misc', check: ({ lists }) => lists.length >= 6 },
+  { id: 'boss-slayer', tier: 'silver', ribbon: 'misc', check: ({ lifetime }) => lifetime.bossesDefeated >= 1 },
 ];
 
 /** Conquistas que acabaram de ser alcançadas (e ainda não estão no personagem). */

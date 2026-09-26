@@ -1,4 +1,5 @@
 import { Suspense, useEffect } from 'react';
+import { BossPanel } from '@/features/boss/BossPanel';
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { PageLoading } from './PageLoading';
 import { useGameStore } from '@/store/useGameStore';
@@ -106,9 +107,12 @@ export function AppLayout() {
           <div className="sticky top-20 flex max-h-[calc(100vh-6rem)] flex-col gap-4 overflow-y-auto pb-1">
             <Sidebar />
             {inQuests ? (
-              <Window as="div">
-                <ListsPanel />
-              </Window>
+              <>
+                <Window as="div">
+                  <ListsPanel />
+                </Window>
+                <BossPanel compact />
+              </>
             ) : null}
           </div>
         </aside>

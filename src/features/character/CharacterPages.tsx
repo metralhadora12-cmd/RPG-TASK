@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { BossPanel } from '@/features/boss/BossPanel';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { maxHp, maxMp, xpToNextLevel } from '@/features/progression/formulas';
 import { t, type MessageKey } from '@/lib/i18n';
@@ -139,6 +140,7 @@ export function StatusPage() {
       </Window>
 
       <div className="flex flex-col gap-4">
+        <BossPanel />
         <Window title={t('status.attributes')}>
           <p className="mb-2 text-shadow-pixel" aria-live="polite">
             {canAllocate ? t('status.unspent', { n: character.unspentPoints }) : t('status.noPoints')}

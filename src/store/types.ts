@@ -110,7 +110,7 @@ export interface Character {
 export interface RewardEvent {
   id: string;
   taskId?: string;
-  kind: 'complete' | 'habitUp' | 'habitDown' | 'dailyMissed' | 'purchase' | 'faint' | 'potion';
+  kind: 'complete' | 'habitUp' | 'habitDown' | 'dailyMissed' | 'purchase' | 'faint' | 'potion' | 'boss';
   /** Variações efetivamente aplicadas (negativas para perdas). */
   xp: number;
   gold: number;
@@ -131,6 +131,22 @@ export interface RewardEvent {
   itemId?: string;
   /** Preenchido quando o evento foi desfeito. */
   revertedAt?: string;
+  /** Dano causado no chefe da semana (estornado ao desfazer). */
+  bossDamage?: number;
+  /** Semana (yyyy-MM-dd do início) do chefe atingido. */
+  bossWeek?: string;
+}
+
+/** Chefe da semana. */
+export interface BossState {
+  /** Primeiro dia (yyyy-MM-dd) da semana. */
+  week: string;
+  bossId: string;
+  maxHp: number;
+  /** Dano acumulado na semana. */
+  damage: number;
+  /** Quando foi derrotado (a recompensa é dada uma vez só). */
+  defeatedAt?: string;
 }
 
 /** Resultado do fechamento de um dia ("Relatório da noite"). */
@@ -163,6 +179,7 @@ export interface LifetimeStats {
   itemsBought: number;
   faints: number;
   habitUps: number;
+  bossesDefeated: number;
 }
 
 export type ReducedMotionPref = 'system' | 'on' | 'off';

@@ -60,6 +60,12 @@ describe('migrate', () => {
     expect(migrate({ lifetime: { faints: 2 } }, 5).lifetime).toMatchObject({ faints: 2, habitUps: 0 });
   });
 
+  it('v6 → v7: chefe da semana vazio e contador de chefes', () => {
+    const state = migrate({ lifetime: { faints: 1 } }, 6);
+    expect(state.boss).toBeNull();
+    expect(state.lifetime).toMatchObject({ faints: 1, bossesDefeated: 0 });
+  });
+
   it('não altera um save que já está na versão atual', () => {
     const save = { settings: defaultSettings, tasks: [{ id: 'x' }] };
     expect(migrate(save, STORE_VERSION)).toBe(save);

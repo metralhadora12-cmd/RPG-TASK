@@ -40,6 +40,14 @@ O app é empacotado com o [Capacitor](https://capacitorjs.com) (pasta `android/`
 
 ## Funcionalidades
 
+### Chefe da semana
+
+- Toda semana aparece um chefe (Rei Gosma, Dragão da Preguiça, Fantasma do Prazo e Gato do Caos, em rodízio). A semana começa no dia configurado em Menu.
+- Concluir missões e rotinas, ou apertar "+" num hábito, tira HP dele. O crítico dobra o golpe. Um número flutuante mostra o dano.
+- Desfazer a tarefa devolve o HP ao chefe. Quando ele cai, o herói ganha XP e Gold uma única vez: essa vitória é um evento à parte e não é desfeita junto com a tarefa.
+- O painel aparece na tela de Status e, compacto, na barra lateral das Missões. Derrotar o primeiro chefe dá a conquista "Caçador de Chefes".
+- Regras em `src/features/boss/boss.ts` (funções puras com testes); estado em `boss` no store (versão 7 do save).
+
 ### Fase 7 — Polimento
 
 - **Áudio chiptune procedural** (`src/features/audio/synth.ts`): ondas quadrada, triangular e ruído, sem nenhum arquivo de áudio.
@@ -245,6 +253,20 @@ Exemplo: missão Média com 2 passos feitos e no prazo → XP = 20 × (1 + 0,2 +
 | Épica | 10 | 7 |
 
 Desmaio (HP ≤ 0): o XP do nível atual vai a 0, perde `floor(10% do Gold)` e o HP volta ao máximo.
+
+### Chefe da semana
+
+| Dificuldade | Dano no chefe |
+|---|---|
+| Trivial | 3 |
+| Fácil | 6 |
+| Média | 12 |
+| Difícil | 24 |
+| Épica | 48 |
+
+- HP do chefe: `150 + 25 × (nível − 1)`, no máximo 1000 (nível do herói quando o chefe aparece).
+- Crítico: dano ×2.
+- Recompensa: `round(0,3 × xpParaProximoNivel(nível))` XP e `20 + 5 × nível` Gold.
 
 ### Níveis
 

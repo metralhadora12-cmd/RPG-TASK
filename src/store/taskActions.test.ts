@@ -135,6 +135,8 @@ describe('progressão ao concluir', () => {
   });
 
   it('desfazer várias conclusões em qualquer ordem volta ao estado inicial', () => {
+    // Chefe já derrotado: a vitória sobre ele é um evento à parte, que não se desfaz.
+    useGameStore.setState({ boss: { ...store().syncBoss(), defeatedAt: '2026-09-25T00:00:00.000Z' } });
     const before = hero();
     const ids = (['trivial', 'easy', 'medium', 'hard', 'epic', 'epic', 'hard'] as const).map((difficulty) =>
       store().addTask({ title: difficulty, difficulty }),

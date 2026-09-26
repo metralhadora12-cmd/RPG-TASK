@@ -9,7 +9,7 @@ import type { PersistedState } from './useGameStore';
  * Versão atual do estado persistido. Ao mudar o formato do estado:
  * incremente, adicione um passo em `steps` e um teste em `migrations.test.ts`.
  */
-export const STORE_VERSION = 6;
+export const STORE_VERSION = 7;
 
 type Step = (state: Record<string, unknown>) => Record<string, unknown>;
 
@@ -76,6 +76,12 @@ const steps: Record<number, Step> = {
     ...state,
     lifetime: { ...defaultLifetime(), ...(state.lifetime as object | undefined) },
     onboardingDone: state.onboardingDone ?? Boolean((state.character as Character | null | undefined)?.name),
+  }),
+  // v6 → v7: chefe da semana (aparece na próxima visita) e contador de chefes derrotados.
+  6: (state) => ({
+    ...state,
+    boss: state.boss ?? null,
+    lifetime: { ...defaultLifetime(), ...(state.lifetime as object | undefined) },
   }),
 };
 

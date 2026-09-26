@@ -3,6 +3,8 @@ import { rolloverDailies } from '@/features/tasks/dayCycle';
 import { gameDayKey } from '@/lib/date';
 import { createId } from '@/lib/id';
 import { progressOf, REWARD_LOG_LIMIT, revertOnCharacter, today } from './taskActions';
+import { bossDamage } from '@/features/boss/boss';
+import { undoBossDamage, type BossHit } from './bossActions';
 import type { Character, FaintInfo, NightReport, RewardEvent, Task } from './types';
 import type { GameState, StoreGet, StoreSet } from './useGameStore';
 
@@ -15,6 +17,8 @@ export interface HabitUpResult {
   fromLevel: number;
   toLevel: number;
   pointsGained: number;
+  /** Dano no chefe da semana (e recompensa, se ele caiu). */
+  boss?: BossHit;
 }
 
 export interface HabitDownResult {
@@ -94,7 +98,9 @@ export function createDayActions(set: StoreSet, get: StoreGet): DayActions {
           habitUps: s.lifetime.habitUps + 1,
         },
       }));
+      const boss = get().hitBoss(bossDamage(task.difficulty, reward.critical), event.id);
       return {
+        boss,
         eventId: event.id,
         xp: event.xp,
         gold: event.gold,
@@ -147,8 +153,10 @@ export function createDayActions(set: StoreSet, get: StoreGet): DayActions {
           event.kind === 'habitUp'
             ? revertOnCharacter(s.character, event)
             : { ...s.character, hp: Math.min(s.character.hp - event.hp, maxHp(s.character.level)) };
+        const logged = s.rewardLog.find((e) => e.id === eventId) ?? event;
         return {
           character,
+          boss: undoBossDamage(s.boss, logged),
           tasks: s.tasks.map((t) => {
             if (t.id !== event.taskId || !t.habitCounts) return t;
             const key = event.kind === 'habitUp' ? 'up' : 'down';

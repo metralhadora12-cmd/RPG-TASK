@@ -5,6 +5,8 @@ import { applyReward, computeReward, POINTS_PER_LEVEL, revertReward, type Progre
 import { classBaseStats } from '@/sprites/characterParts';
 import { gameDayKey } from '@/lib/date';
 import { createId } from '@/lib/id';
+import { bossDamage } from '@/features/boss/boss';
+import { undoBossDamage, type BossHit } from './bossActions';
 import type { Character, Difficulty, RewardEvent, Subtask, Task, TaskKind } from './types';
 import type { GameState, StoreGet, StoreSet } from './useGameStore';
 
@@ -33,6 +35,8 @@ export interface CompleteResult {
     toLevel: number;
     pointsGained: number;
   };
+  /** Dano no chefe da semana (e recompensa, se ele caiu). */
+  boss?: BossHit;
 }
 
 export interface CompleteOptions {
@@ -225,6 +229,7 @@ export function createTaskActions(set: StoreSet, get: StoreGet): TaskActions {
           bestStreak: Math.max(s.lifetime.bestStreak, newStreak),
         },
       }));
+      result.boss = get().hitBoss(bossDamage(task.difficulty, reward.critical), event.id);
       return result;
     },
 
@@ -247,6 +252,7 @@ export function createTaskActions(set: StoreSet, get: StoreGet): TaskActions {
           ),
         ...(event
           ? {
+              boss: undoBossDamage(s.boss, event),
               character: revertOnCharacter(s.character, event),
               rewardLog: s.rewardLog.map((e) => (e.id === event.id ? { ...e, revertedAt: now } : e)),
               lifetime: {
