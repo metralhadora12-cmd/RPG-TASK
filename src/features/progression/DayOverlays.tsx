@@ -148,7 +148,7 @@ export function GameOverOverlay() {
           >
             {t('faint.title')}
           </motion.h2>
-          <HeroSprite pose="fainted" scale={5} animate={false} />
+          <HeroSprite pose="fainted" scale={4} animate={false} />
           <Window className="max-w-md">
             <p className="font-title mb-2 text-[0.7rem] text-win-accent">{t('faint.subtitle')}</p>
             <div id="game-over-body">

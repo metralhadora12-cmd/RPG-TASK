@@ -37,7 +37,7 @@ function Grid({ title, children }: { title: string; children: ReactNode }) {
 /** Visualizador de todas as combinações de sprite (debug) em /dev/sprites. */
 export function DevSpritesPage() {
   const [pose, setPose] = useState<Pose>('idle0');
-  const [scale, setScale] = useState(3);
+  const [scale, setScale] = useState(2);
   const [classId, setClassId] = useState<ClassId>('warrior');
   const [base, setBase] = useState<Appearance>({ body: 'a', skin: 2, hairStyle: 0, hairColor: 3, eyes: 0, outfit: 0 });
   const ids = { pose: useId(), scale: useId(), cls: useId(), body: useId() };
@@ -57,7 +57,7 @@ export function DevSpritesPage() {
           </select>
           <label htmlFor={ids.scale}>{t('dev.sprites.scale')}</label>
           <select id={ids.scale} className="px-input w-auto!" value={scale} onChange={(e) => setScale(Number(e.target.value))}>
-            {[1, 2, 3, 4, 6].map((n) => (
+            {[1, 2, 3, 4].map((n) => (
               <option key={n} value={n}>
                 ×{n}
               </option>

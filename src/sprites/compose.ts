@@ -10,25 +10,28 @@ import {
   type Outfit,
 } from './characterParts';
 import * as L from './layerData';
-import { breatheRows, expandLayer, widenRows } from './layers';
-import { SPRITE_SIZE, type PaletteLayer, type PixelGrid } from './types';
+import { breatheRows, expandLayer, shiftRows, widenRows } from './layers';
+import { derive, tone } from './palette';
+import { HERO, SPRITE_SIZE, type PaletteLayer, type PixelGrid, type SpritePalette } from './types';
 
 export type Pose = 'idle0' | 'idle1' | 'victory' | 'fainted';
 
 /**
- * Ordem de desenho (de trás para frente). Itens da loja entram nos slots
- * `hat`, `weapon`, `accessory` e `pet`; camadas com `behind` vão para `back`.
+ * Ordem de desenho (de trás para frente). O herói está em 3/4 voltado para a direita:
+ * o braço de trás (`armBack`) fica atrás do corpo e o da frente (`arms`) por cima da arma.
+ * Itens da loja entram em `hat`, `weapon`, `accessory` e `pet`; camadas com `behind` vão para `back`.
  */
 export const LAYER_ORDER = [
   'back',
   'hairBack',
+  'armBack',
   'body',
   'outfit',
   'face',
   'hairFront',
   'hat',
-  'arms',
   'weapon',
+  'arms',
   'accessory',
   'pet',
 ] as const;
@@ -41,7 +44,9 @@ export interface CharacterLook {
 }
 
 /** Camadas extras (equipamentos) por slot. */
-export type ExtraLayers = Partial<Record<Exclude<LayerSlot, 'hairBack' | 'body' | 'outfit' | 'face' | 'hairFront' | 'arms'>, PaletteLayer[]>>;
+export type ExtraLayers = Partial<
+  Record<Exclude<LayerSlot, 'hairBack' | 'armBack' | 'body' | 'outfit' | 'face' | 'hairFront' | 'arms'>, PaletteLayer[]>
+>;
 
 /** Equipamentos aplicados ao herói. */
 export interface Equipment {
@@ -50,47 +55,96 @@ export interface Equipment {
   outfit?: Outfit;
   /** Chapéus fechados (elmo, capuz) escondem o cabelo. */
   hideHair?: boolean;
+  /** Chapéus com aba: o cabelo acima desta linha fica escondido dentro do chapéu. */
+  hairClip?: number;
 }
 
 const at = <T,>(list: readonly T[], index: number): T => list[((index % list.length) + list.length) % list.length]!;
+const EMPTY_ROW = '.'.repeat(SPRITE_SIZE);
+
+/** Só os tons de pele (sem o branco/brilho padrão do `derive`, para não sobrepor o metal). */
+function skinKeys(index: number): SpritePalette {
+  const skin = derive(at(skinTones, index));
+  return { t: skin.t!, s: skin.s!, S: skin.S!, u: skin.u! };
+}
+
+/** Paleta de uma camada de item da loja (contorno tinta; tons completados pelo `derive`). */
+export function itemPalette(palette: SpritePalette): SpritePalette {
+  return derive({ ...basePalette, ...palette });
+}
+
+/** Paleta de roupa (tecido, detalhes, couro, metal e a pele que aparece em golas e mãos). */
+export function outfitPalette(palette: SpritePalette, skin = 2): SpritePalette {
+  return derive({ ...basePalette, ...skinKeys(skin), ...palette });
+}
 
 /** Monta as camadas do personagem (já expandidas), em ordem de desenho. */
 export function characterLayers(look: CharacterLook, pose: Pose, equipment: Equipment = {}): { slot: LayerSlot; layer: PaletteLayer }[] {
   const extras = equipment.layers ?? {};
   const { appearance, classId } = look;
-  const skin = at(skinTones, appearance.skin);
+  const skin = skinKeys(appearance.skin);
   const hair = at(hairStyles, appearance.hairStyle);
-  const hairPalette = { ...basePalette, ...at(hairColors, appearance.hairColor).palette };
+  const hairBase = derive(at(hairColors, appearance.hairColor).palette);
+  const hairPalette: SpritePalette = { ...hairBase, o: tone(hairBase.k!, -1), a: '#e83870', A: '#a02850' };
   const outfit = equipment.outfit ?? at(classOutfits[classId], appearance.outfit);
-  // A gola deixa a pele aparecer, então a roupa também conhece a cor da pele.
-  const outfitPalette = { ...basePalette, ...skin, ...outfit.palette };
+  const shape = outfitShapes[outfit.shape];
+  const clothes = outfitPalette(outfit.palette, appearance.skin);
+  const eyes = derive(at(eyeColors, appearance.eyes).palette);
+  const clip = equipment.hairClip;
+  const hairRows = (rows: readonly string[]) => (clip == null ? rows : rows.map((r, y) => (y < clip ? EMPTY_ROW : r)));
+  const hideHair = Boolean(equipment.hideHair);
+  const [faceId, faceArt] =
+    pose === 'fainted'
+      ? (['face-closed', L.faceClosed] as const)
+      : pose === 'victory'
+        ? (['face-happy', L.faceHappy] as const)
+        : (['face', L.faceOpen] as const);
 
   const base: Record<string, PaletteLayer[]> = {
-    hairBack: hair.back && !equipment.hideHair ? [{ id: `hair-back-${hair.id}`, rows: expandLayer(hair.back), palette: hairPalette }] : [],
-    body: [{ id: 'body', rows: expandLayer(L.body), palette: { ...basePalette, ...skin } }],
-    outfit: [{ id: outfit.id, rows: expandLayer(outfitShapes[outfit.shape]), palette: outfitPalette }],
+    hairBack:
+      hair.back && !hideHair ? [{ id: `hair-back-${hair.id}`, rows: hairRows(expandLayer(hair.back)), palette: hairPalette }] : [],
+    armBack: [
+      {
+        id: pose === 'victory' ? 'arm-up' : 'arm-far',
+        rows: expandLayer(pose === 'victory' ? shape.up : shape.far),
+        palette: clothes,
+        anchor: 'far',
+      },
+    ],
+    body: [{ id: 'body', rows: expandLayer(L.body), palette: { ...skin, o: tone(skin.S!, -2.4) } }],
+    outfit: [{ id: outfit.id, rows: expandLayer(shape.body), palette: clothes }],
     face: [
       {
-        id: pose === 'fainted' ? 'face-closed' : 'face',
-        rows: expandLayer(pose === 'fainted' ? L.faceClosed : L.faceOpen),
-        palette: { ...basePalette, ...skin, ...at(eyeColors, appearance.eyes).palette },
+        id: faceId,
+        rows: expandLayer(faceArt),
+        palette: {
+          o: '#231a2a',
+          W: '#ffffff',
+          E: eyes.E!,
+          e: eyes.e!,
+          i: eyes.i!,
+          s: skin.s!,
+          S: skin.S!,
+          u: skin.u!,
+          r: tone(skin.S!, -1.2),
+          x: tone(skin.S!, -2),
+          k: hairBase.k!,
+        },
       },
     ],
-    hairFront: equipment.hideHair ? [] : [{ id: `hair-${hair.id}`, rows: expandLayer(hair.front), palette: hairPalette }],
-    arms: [
-      {
-        id: pose === 'victory' ? 'arms-victory' : 'arms',
-        rows: expandLayer(pose === 'victory' ? L.armsVictory : L.armsDown),
-        // Mãos com a pele, mangas com a roupa.
-        palette: { ...basePalette, ...skin, v: outfit.palette.v ?? '#888888', V: outfit.palette.V ?? '#555555' },
-      },
-    ],
+    hairFront: hideHair ? [] : [{ id: `hair-${hair.id}`, rows: hairRows(expandLayer(hair.front)), palette: hairPalette }],
+    arms: [{ id: 'arms', rows: expandLayer(shape.near), palette: clothes, anchor: 'near' }],
   };
 
   const result: { slot: LayerSlot; layer: PaletteLayer }[] = [];
   for (const slot of LAYER_ORDER) {
     const own = base[slot] ?? [];
-    const extra = slot === 'back' ? Object.values(extras).flat().filter((l) => l.behind) : (extras[slot as keyof ExtraLayers] ?? []).filter((l) => !l.behind);
+    const extra =
+      slot === 'back'
+        ? Object.values(extras)
+            .flat()
+            .filter((l) => l.behind)
+        : (extras[slot as keyof ExtraLayers] ?? []).filter((l) => !l.behind);
     for (const layer of [...own, ...extra]) result.push({ slot, layer });
   }
   return result;
@@ -101,7 +155,7 @@ function emptyGrid(): PixelGrid {
 }
 
 /** Desenha as camadas numa grade de cores, aplicando a paleta de cada uma. */
-export function paintLayers(layers: { rows: readonly string[]; palette: Record<string, string> }[]): PixelGrid {
+export function paintLayers(layers: { rows: readonly string[]; palette: SpritePalette }[]): PixelGrid {
   const grid = emptyGrid();
   for (const { rows, palette } of layers) {
     rows.forEach((row, y) => {
@@ -132,17 +186,22 @@ export function layDown(grid: PixelGrid): PixelGrid {
   return out;
 }
 
+/** Ajusta uma camada à silhueta (robusta: tronco alarga, braços deslizam) e ao quadro de respiração. */
+function fitLayer(layer: PaletteLayer, wide: boolean, pose: Pose): readonly string[] {
+  if (layer.fixed) return layer.rows;
+  let rows: readonly string[] = layer.rows;
+  if (wide) rows = layer.anchor ? shiftRows(rows, layer.anchor === 'near' ? -HERO.armShift : HERO.armShift) : widenRows(rows);
+  if (pose === 'idle1') rows = breatheRows(rows);
+  return rows;
+}
+
 /** Compõe o sprite completo do personagem para uma pose. */
 export function composeCharacter(look: CharacterLook, pose: Pose, equipment: Equipment = {}): PixelGrid {
   const wide = look.appearance.body === 'b';
-  const layers = characterLayers(look, pose, equipment).map(({ layer }) => {
-    let rows: readonly string[] = layer.rows;
-    if (!layer.fixed) {
-      if (wide) rows = widenRows(rows);
-      if (pose === 'idle1') rows = breatheRows(rows);
-    }
-    return { rows, palette: layer.palette };
-  });
+  const layers = characterLayers(look, pose, equipment).map(({ layer }) => ({
+    rows: fitLayer(layer, wide, pose),
+    palette: layer.palette,
+  }));
   const grid = paintLayers(layers);
   return pose === 'fainted' ? layDown(grid) : grid;
 }

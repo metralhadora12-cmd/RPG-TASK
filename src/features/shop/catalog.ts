@@ -30,6 +30,10 @@ export interface LayerItem extends BaseItem {
   behind?: boolean;
   /** Esconde o cabelo (elmo, capuz). */
   hidesHair?: boolean;
+  /** Chapéus com aba: esconde o cabelo acima desta linha (fica dentro do chapéu). */
+  hairClip?: number;
+  /** Parte da frente (ex.: gola e fecho da capa), desenhada por cima do corpo. */
+  front?: LayerSource;
 }
 
 export interface ArmorItem extends BaseItem {
@@ -72,13 +76,13 @@ export const POTION_ID = 'potion-life';
 export const catalog: ShopItem[] = [
   // Chapéus
   { id: 'hat-bandana', category: 'hat', price: 30, rarity: 'common', minLevel: 1, art: A.hatBandana, palette: { c: '#c83830', C: '#882020', a: '#f8f8f8' } },
-  { id: 'hat-straw', category: 'hat', price: 40, rarity: 'common', minLevel: 1, art: A.hatStraw, palette: { c: '#e8c870', C: '#b09040', a: '#c83830' } },
+  { id: 'hat-straw', category: 'hat', price: 40, rarity: 'common', minLevel: 1, art: A.hatStraw, hairClip: 9, palette: { c: '#e8c870', C: '#b09040', a: '#c83830' } },
   { id: 'hat-hood', category: 'hat', price: 60, rarity: 'common', minLevel: 2, art: A.hatHood, hidesHair: true, palette: { c: '#3a7a38', C: '#245024' } },
   { id: 'hat-wreath', category: 'hat', price: 90, rarity: 'uncommon', minLevel: 3, art: A.hatWreath, palette: { c: '#48a048', C: '#2a6a2a', a: '#f878b0', A: '#f8e070' } },
   { id: 'hat-helmet', category: 'hat', price: 120, rarity: 'uncommon', minLevel: 3, art: A.hatHelmet, hidesHair: true, palette: { m: '#c8d0e0', M: '#7880a0', a: '#a06030', w: '#ffffff' } },
-  { id: 'hat-wizard', category: 'hat', price: 220, rarity: 'rare', minLevel: 6, art: A.hatWizard, palette: { c: '#6a38b8', C: '#40207a', a: '#f0c030' } },
+  { id: 'hat-wizard', category: 'hat', price: 220, rarity: 'rare', minLevel: 6, art: A.hatWizard, hairClip: 9, palette: { c: '#6a38b8', C: '#40207a', a: '#f0c030' } },
   { id: 'hat-helmet-royal', category: 'hat', price: 480, rarity: 'epic', minLevel: 10, art: A.hatHelmet, hidesHair: true, palette: { m: '#f8d860', M: '#b08820', a: '#c83830', w: '#fff8c0' } },
-  { id: 'hat-wizard-astral', category: 'hat', price: 520, rarity: 'epic', minLevel: 10, art: A.hatWizard, palette: { c: '#182048', C: '#0c1028', a: '#a8e8ff' } },
+  { id: 'hat-wizard-astral', category: 'hat', price: 520, rarity: 'epic', minLevel: 10, art: A.hatWizard, hairClip: 9, palette: { c: '#182048', C: '#0c1028', a: '#a8e8ff' } },
   { id: 'hat-crown', category: 'hat', price: 1200, rarity: 'legendary', minLevel: 15, art: A.hatCrown, palette: { a: '#f8c838', A: '#b08010', c: '#e83850' } },
 
   // Roupas
@@ -89,11 +93,11 @@ export const catalog: ShopItem[] = [
   { id: 'armor-mithril', category: 'armor', price: 550, rarity: 'epic', minLevel: 10, outfit: { shape: 'armor', palette: { ...leather, m: '#d8f0ff', M: '#88a8c8', p: '#6888a8', P: '#486888', a: '#88e0ff', A: '#48a0c8', v: '#a8c8e8', V: '#6888a8' } } },
   { id: 'armor-dragon', category: 'armor', price: 1400, rarity: 'legendary', minLevel: 15, outfit: { shape: 'armor', palette: { b: '#301818', B: '#180808', m: '#e84830', M: '#881818', p: '#301818', P: '#180808', a: '#f8c838', A: '#b08010', v: '#b02020', V: '#701010' } } },
 
-  // Armas (na mão esquerda, que fica abaixada na pose de vitória)
+  // Armas (na mão da frente, que continua segurando a arma na pose de vitória)
   { id: 'wpn-sword', category: 'weapon', price: 45, rarity: 'common', minLevel: 1, art: A.wpnSword, palette: { m: '#d8e0f0', M: '#8890a8', a: '#b08040', b: '#6a4020' } },
   { id: 'wpn-bow', category: 'weapon', price: 95, rarity: 'uncommon', minLevel: 2, art: A.wpnBow, palette: { b: '#9a6a38', w: '#f0f0f0', a: '#c83830' } },
   { id: 'wpn-staff-oak', category: 'weapon', price: 100, rarity: 'uncommon', minLevel: 3, art: A.wpnStaff, palette: { c: '#48c060', C: '#287838', w: '#e0ffe0', b: '#8a5a30', B: '#5a3818' } },
-  { id: 'wpn-axe', category: 'weapon', price: 240, rarity: 'rare', minLevel: 6, art: A.wpnAxe, palette: { m: '#c8d0e0', M: '#7880a0', b: '#7a4a28' } },
+  { id: 'wpn-axe', category: 'weapon', price: 240, rarity: 'rare', minLevel: 6, art: A.wpnAxe, palette: { m: '#c8d0e0', M: '#7880a0', b: '#7a4a28', a: '#b08040' } },
   { id: 'wpn-staff-arcane', category: 'weapon', price: 280, rarity: 'rare', minLevel: 6, art: A.wpnStaff, palette: { c: '#a048f0', C: '#6828a8', w: '#f0d8ff', b: '#303048', B: '#181828' } },
   { id: 'wpn-sword-flame', category: 'weapon', price: 600, rarity: 'epic', minLevel: 10, art: A.wpnSword, palette: { m: '#f8b040', M: '#e04818', a: '#402020', b: '#281010' } },
   { id: 'wpn-sword-legend', category: 'weapon', price: 1300, rarity: 'legendary', minLevel: 15, art: A.wpnSword, palette: { m: '#a8f0ff', M: '#38a8d0', a: '#f8d860', b: '#f8f8f8' } },
@@ -101,9 +105,9 @@ export const catalog: ShopItem[] = [
   // Acessórios
   { id: 'acc-glasses', category: 'accessory', price: 35, rarity: 'common', minLevel: 1, art: A.accGlasses, palette: {} },
   { id: 'acc-scarf', category: 'accessory', price: 45, rarity: 'common', minLevel: 1, art: A.accScarf, palette: { c: '#e8a020', C: '#a86810', a: '#f8f0d0' } },
-  { id: 'acc-cape', category: 'accessory', price: 130, rarity: 'uncommon', minLevel: 3, art: A.accCape, behind: true, palette: { c: '#b82828', C: '#801818', a: '#f0c030' } },
+  { id: 'acc-cape', category: 'accessory', price: 130, rarity: 'uncommon', minLevel: 3, art: A.accCape, front: A.accCapeFront, behind: true, palette: { c: '#b82828', C: '#801818', a: '#f0c030' } },
   { id: 'acc-amulet', category: 'accessory', price: 250, rarity: 'rare', minLevel: 6, art: A.accAmulet, palette: { a: '#f0c030', c: '#38d8a8', C: '#189878' } },
-  { id: 'acc-cape-royal', category: 'accessory', price: 500, rarity: 'epic', minLevel: 10, art: A.accCape, behind: true, palette: { c: '#5a2890', C: '#381860', a: '#f8d860' } },
+  { id: 'acc-cape-royal', category: 'accessory', price: 500, rarity: 'epic', minLevel: 10, art: A.accCape, front: A.accCapeFront, behind: true, palette: { c: '#5a2890', C: '#381860', a: '#f8d860' } },
   { id: 'acc-wings', category: 'accessory', price: 1100, rarity: 'legendary', minLevel: 15, art: A.accWings, behind: true, palette: { w: '#f8f8ff', c: '#b8d8ff' } },
 
   // Mascotes

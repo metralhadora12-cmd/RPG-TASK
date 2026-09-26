@@ -21,7 +21,9 @@ export function HeroStage({ equipped, scale = 5, width = 300, children }: HeroSt
   return (
     <div className="stage relative flex justify-center overflow-hidden p-0!" style={{ height: BG_HEIGHT * scale }}>
       <BackgroundCanvas id={bg} width={width} scale={scale} className="absolute inset-0 m-auto" />
-      <div className="relative self-end">{children}</div>
+      <div className="relative self-end" style={{ marginBottom: -Math.round(scale * 0.6) }}>
+        {children}
+      </div>
     </div>
   );
 }

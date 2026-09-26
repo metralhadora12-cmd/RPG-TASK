@@ -1,6 +1,6 @@
 import type { Equipment, ExtraLayers } from '@/sprites/compose';
 import { expandLayer } from '@/sprites/layers';
-import { basePalette } from '@/sprites/characterParts';
+import { itemPalette } from '@/sprites/compose';
 import type { Character, Slot } from '@/store/types';
 import type { BackgroundId } from './backgrounds';
 import { getItem } from './catalog';
@@ -17,15 +17,19 @@ export function equipmentFor(equipped: Equipped): Equipment {
     if (item.category === 'armor') {
       result.outfit = { id: item.id, ...item.outfit };
     } else if (item.category === 'hat' || item.category === 'weapon' || item.category === 'accessory' || item.category === 'pet') {
-      const layer = {
+      const palette = itemPalette(item.palette);
+      (layers[item.category] ??= []).push({
         id: item.id,
         rows: expandLayer(item.art),
-        palette: { ...basePalette, ...item.palette },
+        palette,
         behind: item.behind,
         fixed: item.category === 'pet',
-      };
-      (layers[item.category] ??= []).push(layer);
+        // A arma fica na mão da frente e acompanha o braço.
+        anchor: item.category === 'weapon' ? 'near' : undefined,
+      });
+      if (item.front) (layers.accessory ??= []).push({ id: `${item.id}-front`, rows: expandLayer(item.front), palette });
       if (item.hidesHair) result.hideHair = true;
+      if (item.hairClip != null) result.hairClip = Math.max(result.hairClip ?? 0, item.hairClip);
     }
   }
   return result;

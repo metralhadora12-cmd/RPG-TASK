@@ -71,8 +71,8 @@ export function EquipmentPage() {
     <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
       <div className="flex flex-col gap-4">
         <Window title={t('equip.title')}>
-          <HeroStage scale={5} width={260}>
-            <HeroSprite scale={5} label={character.name} />
+          <HeroStage scale={4} width={256}>
+            <HeroSprite scale={2} label={character.name} />
           </HeroStage>
         </Window>
         <Window title={t('equip.consumables')}>

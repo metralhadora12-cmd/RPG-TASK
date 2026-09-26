@@ -66,7 +66,8 @@ O app é empacotado com o [Capacitor](https://capacitorjs.com) (pasta `android/`
 - **Loja** (`/loja`) com **Bartolo, o Mercador**: NPC original montado com as mesmas peças do herói, mais bigode e chapéu próprios. Ele fala com efeito de digitação e reage a compra, falta de ouro ou falta de nível.
 - **Catálogo** (`src/features/shop/catalog.ts`) com **43 itens** em 8 abas (Ofertas, Chapéus, Roupas, Armas, Acessórios, Pets, Fundos, Temas, Itens).
   - Cada item tem nome, descrição, preço, **raridade** (Comum/Incomum/Raro/Épico/Lendário, com a cor da borda) e nível mínimo.
-  - Toda a arte é original: camadas 32×32 com paleta própria, e alguns itens reaproveitam a mesma forma com outra paleta (ex.: Chapéu de Mago e Chapéu Astral).
+  - Toda a arte é original: camadas 64×64 na mesma vista 3/4 do herói, com paleta própria. Alguns itens reaproveitam a mesma forma com outra paleta (ex.: Chapéu de Mago e Chapéu Astral).
+  - Chapéus com aba escondem o cabelo acima da testa (o cabelo aparece só por baixo da aba). Elmo e capuz escondem o cabelo inteiro. A capa tem a gola na frente do ombro e o resto atrás do corpo.
 - **Ofertas do dia**: 4 itens com 20% de desconto, sorteados com semente pela data. São os mesmos o dia inteiro e mudam no dia seguinte.
 - **Prévia** no próprio herói (com o cenário, se houver). Temas mostram uma janela de amostra.
 - **Compra** com confirmação "Comprar X por 120G? Sim/Não", chuva de moedas e "−120 G". Vitrine navegável pelo teclado em grade (setas; Enter vai para "Comprar").
@@ -97,15 +98,17 @@ O app é empacotado com o [Capacitor](https://capacitorjs.com) (pasta `android/`
 
 ### Fase 4 — Personagem
 
-- **Sprites procedurais em camadas** (`src/sprites/`). Cada parte é uma matriz 32×32 de chaves de paleta, escrita como texto em `layerData.ts`. Camadas simétricas guardam só a metade esquerda, que é espelhada em tempo de execução.
-  - O `compose.ts` junta as camadas em ordem fixa: fundo/capa → cabelo de trás → corpo → roupa → rosto → cabelo → chapéu → braços → arma → acessório → mascote.
-  - Cada camada tem a própria paleta, então recolorir é só trocar a paleta.
+- **Sprites de JRPG 32-bit em camadas** (`src/sprites/`): herói de 64×64 em **vista 3/4 voltada para a direita**, em pose de combate (pernas afastadas, arma na mão da frente, punho de trás em guarda), com cabelo espetado de anime e rosto com olhos grandes.
+  - Cada parte é uma matriz de chaves de paleta escrita como texto em `layerData.ts` e `itemData.ts`. A arte foi gerada por scripts (formas, sombreamento pela direção da luz e retoques pixel a pixel) e exportada como texto.
+  - Cada material tem 4 tons (luz · base · sombra · sombra profunda). As paletas definem só a base; `palette.ts` deriva o resto com **desvio de matiz** (sombras puxam para o vermelho/roxo, luzes para o amarelo), como nos sprites da era 32 bits.
+  - O `compose.ts` junta as camadas em ordem fixa: capa/asas → cabelo de trás → braço de trás → cabeça → roupa → rosto → cabelo → chapéu → arma → braço da frente → acessório → mascote. Cada roupa (túnica, manto, armadura, colete) tem os próprios braços e mangas.
+  - Cada camada tem a própria paleta, então recolorir pele, cabelo, olhos e roupas é só trocar a paleta.
   - O resultado é desenhado em `<canvas>` com `imageSmoothingEnabled = false` e escala inteira.
 - **Poses**:
-  - parado, com 2 quadros de respiração (a cabeça desce 1px);
-  - vitória, com o braço erguido;
+  - parado, com 2 quadros de respiração (tudo acima da cintura desce 1px);
+  - vitória, com o punho de trás erguido e rosto sorrindo;
   - desmaiado, com o sprite girado e apoiado no chão e os olhos fechados.
-- **Silhuetas**: esguia, ou robusta, que alarga o tronco em 2px e afasta as pernas por transformação procedural, sem arte duplicada.
+- **Silhuetas**: esguia, ou robusta, que alarga o tronco em 4px e afasta as pernas por transformação procedural. Os braços e a arma deslizam junto com os ombros, sem arte duplicada.
 - **Criação de personagem** (obrigatória no primeiro acesso, em `/criar`):
   - menu de JRPG com prévia ao vivo;
   - nome (até 12 letras), classe com descrição, bônus e atributos iniciais;

@@ -36,7 +36,7 @@ export function Onboarding() {
       text={t(STEPS[step]!, { name })}
       portrait={
         <div className="stage">
-          <CharacterSprite look={mentorLook} equipment={equipment} scale={3} label={t('mentor.name')} />
+          <CharacterSprite look={mentorLook} equipment={equipment} scale={2} label={t('mentor.name')} />
         </div>
       }
       actions={[

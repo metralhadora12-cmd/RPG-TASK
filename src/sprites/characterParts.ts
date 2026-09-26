@@ -1,18 +1,17 @@
 /**
- * Peças e paletas do personagem.
+ * Peças e paletas do personagem (vista 3/4 voltada para a direita, estilo JRPG 32-bit).
  *
- * Legenda das chaves de paleta usadas nas camadas:
- *   o contorno · w branco/brilho · r boca
- *   s/S pele (luz/sombra) · e íris
- *   h/H/l cabelo (base/sombra/brilho)
- *   c/C roupa · a/A detalhe · p/P calça · b/B couro/botas · m/M metal · v/V manga
+ * As paletas definem a base de cada material (e às vezes a sombra); `derive` completa a
+ * rampa (luz · base · sombra · sombra profunda) com desvio de matiz:
+ *   pele t s S u · cabelo L l h H k · íris E e i · boca r x
+ *   roupa f c C d · detalhe g a A z · calça q p P Q · couro/botas j b B N · metal w m M n · manga y v V Y
  */
 import type { ClassId } from '@/store/types';
 import * as L from './layerData';
 import type { LayerSource, SpritePalette } from './types';
 
 export const OUTLINE = '#1a1428';
-export const basePalette: SpritePalette = { o: OUTLINE, w: '#f8f8f8', r: '#a84040' };
+export const basePalette: SpritePalette = { o: OUTLINE, r: '#a84040' };
 
 // ---------------------------------------------------------------------------
 // Pele, olhos e cabelo (recoloridos por troca de paleta)
@@ -78,12 +77,24 @@ export const bodyTypes = ['a', 'b'] as const;
 // Roupas iniciais (3 por classe): formato + paleta
 // ---------------------------------------------------------------------------
 
+/** Formato de roupa: tronco + pernas, e os braços com as mangas daquela roupa. */
+export interface OutfitShape {
+  /** Tronco, pernas e botas. */
+  body: LayerSource;
+  /** Braço da frente (segura a arma), desenhado por cima do tronco. */
+  near: LayerSource;
+  /** Braço de trás em guarda, desenhado atrás do corpo. */
+  far: LayerSource;
+  /** Braço de trás erguido (pose de vitória). */
+  up: LayerSource;
+}
+
 export const outfitShapes = {
-  tunic: L.outfitTunic,
-  robe: L.outfitRobe,
-  armor: L.outfitArmor,
-  vest: L.outfitVest,
-} as const satisfies Record<string, LayerSource>;
+  tunic: { body: L.outfitTunic, near: L.armsTunicNear, far: L.armsTunicFar, up: L.armsTunicUp },
+  robe: { body: L.outfitRobe, near: L.armsRobeNear, far: L.armsRobeFar, up: L.armsRobeUp },
+  armor: { body: L.outfitArmor, near: L.armsArmorNear, far: L.armsArmorFar, up: L.armsArmorUp },
+  vest: { body: L.outfitVest, near: L.armsVestNear, far: L.armsVestFar, up: L.armsVestUp },
+} as const satisfies Record<string, OutfitShape>;
 
 export interface Outfit {
   id: string;

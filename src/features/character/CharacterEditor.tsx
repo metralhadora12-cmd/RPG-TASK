@@ -272,7 +272,7 @@ export function CharacterEditor({ mode, initial, level, onConfirm, onCancel }: C
             <CharacterSprite
               look={{ appearance, classId }}
               pose={celebrate ? 'victory' : 'idle'}
-              scale={6}
+              scale={4}
               label={`${draft.name || t('hud.noHero')} — ${t(`class.${classId}`)}`}
             />
           </div>

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { basePalette, outfitShapes, skinTones } from '@/sprites/characterParts';
-import { paintLayers } from '@/sprites/compose';
+import { outfitShapes } from '@/sprites/characterParts';
+import { itemPalette, outfitPalette, paintLayers } from '@/sprites/compose';
 import { expandLayer } from '@/sprites/layers';
 import { SpriteCanvas } from '@/sprites/SpriteCanvas';
 import { palette, themes } from '@/ui/palette';
@@ -10,18 +10,20 @@ import type { ShopItem } from './catalog';
 
 const POTION = ['...##...', '...#w#..', '..#ww#..', '.#rrrr#.', '#rwrrrr#', '#rrrrrr#', '#rrrrrr#', '.######.'] as const;
 
-/** Recorta a caixa com pixels de uma grade de camada. */
-function bounds(rows: readonly string[]) {
-  let x0 = 32, x1 = 0, y0 = 32, y1 = 0;
-  rows.forEach((row, y) => {
-    for (let x = 0; x < row.length; x++) {
-      if (row[x] === '.') continue;
-      x0 = Math.min(x0, x);
-      x1 = Math.max(x1, x + 1);
-      y0 = Math.min(y0, y);
-      y1 = Math.max(y1, y + 1);
-    }
-  });
+/** Recorta a caixa com pixels de uma ou mais camadas. */
+function bounds(...layers: (readonly string[])[]) {
+  let x0 = 64, x1 = 0, y0 = 64, y1 = 0;
+  for (const rows of layers) {
+    rows.forEach((row, y) => {
+      for (let x = 0; x < row.length; x++) {
+        if (row[x] === '.') continue;
+        x0 = Math.min(x0, x);
+        x1 = Math.max(x1, x + 1);
+        y0 = Math.min(y0, y);
+        y1 = Math.max(y1, y + 1);
+      }
+    });
+  }
   return { x: [x0, x1] as [number, number], y: [y0, y1] as [number, number] };
 }
 
@@ -30,12 +32,15 @@ export function ItemIcon({ item, scale = 2 }: { item: ShopItem; scale?: number }
   const art = useMemo(() => {
     if ('art' in item) {
       const rows = expandLayer(item.art);
-      return { grid: paintLayers([{ rows, palette: { ...basePalette, ...item.palette } }]), crop: bounds(rows) };
+      return { grid: paintLayers([{ rows, palette: itemPalette(item.palette) }]), crop: bounds(rows) };
     }
     if (item.category === 'armor') {
-      const rows = expandLayer(outfitShapes[item.outfit.shape]);
-      const grid = paintLayers([{ rows, palette: { ...basePalette, ...skinTones[2]!, ...item.outfit.palette } }]);
-      return { grid, crop: bounds(rows) };
+      // Roupa "no manequim": braço de trás, tronco e braço da frente.
+      const shape = outfitShapes[item.outfit.shape];
+      const palette = outfitPalette(item.outfit.palette);
+      const parts = [shape.far, shape.body, shape.near].map((l) => expandLayer(l));
+      const grid = paintLayers(parts.map((rows) => ({ rows, palette })));
+      return { grid, crop: bounds(...parts) };
     }
     return null;
   }, [item]);

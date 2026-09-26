@@ -42,7 +42,7 @@ function MerchantWindow({ message }: { message: string }) {
   return (
     <Window className="flex items-end gap-4">
       <div className="stage shrink-0">
-        <CharacterSprite look={merchantLook} equipment={merchantEquipment} scale={3} label={t('shop.merchant')} />
+        <CharacterSprite look={merchantLook} equipment={merchantEquipment} scale={2} label={t('shop.merchant')} />
       </div>
       <div className="min-w-0 flex-1">
         <p className="font-title mb-2 text-[0.6rem] text-win-accent">{t('shop.merchant')}</p>
@@ -167,6 +167,8 @@ export function ShopPage() {
               {items.map((item, i) => {
                 const st = status(item);
                 const onOffer = offers.includes(item.id);
+                // Passar o mouse não troca a seleção (senão, ao fechar o diálogo de compra, o cartão sob o cursor roubaria a vez).
+                const { onMouseEnter: _hover, ...cardProps } = nav.getItemProps(i);
                 return (
                   <li key={item.id}>
                     <button
@@ -179,7 +181,7 @@ export function ShopPage() {
                         rarity: t(`rarity.${item.rarity}`),
                         price: st.price,
                       })}
-                      {...nav.getItemProps(i)}
+                      {...cardProps}
                     >
                       <CursorSlot visible={nav.activeIndex === i} />
                       <span className="flex h-14 items-center justify-center">
@@ -218,8 +220,8 @@ export function ShopPage() {
                   <ItemIcon item={selected} scale={4} />
                 </div>
               ) : (
-                <HeroStage equipped={previewEquipped} scale={5} width={260}>
-                  <HeroSprite equipped={previewEquipped} scale={5} />
+                <HeroStage equipped={previewEquipped} scale={4} width={256}>
+                  <HeroSprite equipped={previewEquipped} scale={2} />
                 </HeroStage>
               )}
               <div>

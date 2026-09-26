@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ptBR } from '@/lib/i18n/pt-BR';
-import { basePalette } from '@/sprites/characterParts';
-import { composeCharacter } from '@/sprites/compose';
+import { composeCharacter, itemPalette } from '@/sprites/compose';
 import { expandLayer } from '@/sprites/layers';
 import { useGameStore } from '@/store/useGameStore';
 import { heroState } from '@/test/state';
@@ -37,15 +36,17 @@ describe('catálogo', () => {
     }
   });
 
-  it('a arte de cada item é 32×32 e toda chave tem cor', () => {
+  it('a arte de cada item é 64×64 e toda chave tem cor', () => {
     for (const item of catalog) {
       if (!('art' in item)) continue;
-      const rows = expandLayer(item.art);
-      expect(rows).toHaveLength(32);
-      const palette = { ...basePalette, ...item.palette };
-      for (const row of rows) {
-        expect(row).toHaveLength(32);
-        for (const ch of row) if (ch !== '.') expect(palette[ch], `${item.id} usa "${ch}"`).toBeDefined();
+      const palette = itemPalette(item.palette);
+      for (const art of [item.art, item.front].filter(Boolean)) {
+        const rows = expandLayer(art!);
+        expect(rows).toHaveLength(64);
+        for (const row of rows) {
+          expect(row).toHaveLength(64);
+          for (const ch of row) if (ch !== '.') expect(palette[ch], `${item.id} usa "${ch}"`).toBeDefined();
+        }
       }
     }
   });
@@ -70,7 +71,19 @@ describe('equipamento no sprite', () => {
     expect(dressed).not.toEqual(plain);
     // Mascote fixo no canto inferior direito, inclusive no quadro de respiração.
     const breathing = composeCharacter(look, 'idle1', eq);
-    expect(breathing[30]!.slice(22)).toEqual(dressed[30]!.slice(22));
+    expect(breathing[55]!.slice(48)).toEqual(dressed[55]!.slice(48));
+    expect(dressed[55]!.slice(48).some(Boolean)).toBe(true);
+  });
+
+  it('chapéu de aba corta o cabelo; capa tem gola na frente; arma acompanha o braço', () => {
+    const eq = equipmentFor({ hat: 'hat-wizard', accessory: 'acc-cape', weapon: 'wpn-sword' });
+    expect(eq.hairClip).toBe(9);
+    expect(eq.hideHair).toBeUndefined();
+    expect(eq.layers?.accessory?.map((l) => [l.id, Boolean(l.behind)])).toEqual([
+      ['acc-cape', true],
+      ['acc-cape-front', false],
+    ]);
+    expect(eq.layers?.weapon?.[0]?.anchor).toBe('near');
   });
 
   it('ignora ids desconhecidos', () => {

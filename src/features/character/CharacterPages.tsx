@@ -91,8 +91,8 @@ export function StatusPage() {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
       <Window title={t('status.title')} className="flex flex-col gap-3">
-        <HeroStage scale={6} width={320}>
-          <HeroSprite pose={pose} scale={6} label={character.name} />
+        <HeroStage scale={5} width={320}>
+          <HeroSprite pose={pose} scale={3} label={character.name} />
         </HeroStage>
         <div role="group" aria-label={t('status.poses')} className="flex flex-wrap justify-center gap-1">
           {poses.map((p) => (
