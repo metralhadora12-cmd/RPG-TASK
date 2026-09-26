@@ -1,0 +1,50 @@
+name: APK Android
+
+on:
+  push:
+    branches: [main, 'claude/**']
+  workflow_dispatch:
+
+jobs:
+  apk:
+    name: Compilar APK (debug)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      # O Android SDK já vem instalado no ubuntu-latest (ANDROID_HOME); o Gradle
+      # baixa sozinho a plataforma e as build-tools que faltarem.
+      - name: Conferir Android SDK
+        run: echo "ANDROID_HOME=$ANDROID_HOME" && ls "$ANDROID_HOME"
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Testes
+        run: npm test
+
+      - name: Build web e sincronizar com o Android
+        run: npm run cap:sync
+
+      - name: Compilar APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Publicar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: questlog-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

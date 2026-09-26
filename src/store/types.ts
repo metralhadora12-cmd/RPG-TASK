@@ -3,6 +3,7 @@ import type { Locale } from '@/lib/i18n';
 
 export type Difficulty = 'trivial' | 'easy' | 'medium' | 'hard' | 'epic';
 export type TaskKind = 'todo' | 'daily' | 'habit';
+export type HabitDirection = 'both' | 'up' | 'down';
 export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export type Recurrence =
@@ -29,18 +30,26 @@ export interface Task {
   important: boolean;
   /** Dia (yyyy-MM-dd) em que a tarefa foi adicionada ao "Meu Dia". */
   myDayDate?: string;
+  /** Vencimento (yyyy-MM-dd). */
   dueDate?: string;
+  /** Data/hora local (yyyy-MM-ddTHH:mm) do lembrete. */
   reminderAt?: string;
+  /** Quando o lembrete atual já foi disparado (evita repetir após recarregar). */
+  reminderFiredAt?: string;
   recurrence?: Recurrence;
   subtasks: Subtask[];
   tags: string[];
   completedAt?: string;
   streak: number;
   habitCounts?: { up: number; down: number; date: string };
+  /** Hábitos: quais botões aparecem (+, − ou ambos). */
+  habitDirection?: HabitDirection;
   order: number;
   createdAt: string;
   updatedAt: string;
 }
+
+export type SortMode = 'manual' | 'dueDate' | 'importance' | 'difficulty' | 'alpha';
 
 export interface TaskList {
   id: string;
@@ -101,13 +110,76 @@ export interface Character {
 export interface RewardEvent {
   id: string;
   taskId?: string;
-  kind: 'complete' | 'undo' | 'habitUp' | 'habitDown' | 'dailyMissed' | 'purchase' | 'faint' | 'potion';
+  kind: 'complete' | 'habitUp' | 'habitDown' | 'dailyMissed' | 'purchase' | 'faint' | 'potion' | 'boss';
+  /** Variações efetivamente aplicadas (negativas para perdas). */
   xp: number;
   gold: number;
   hp: number;
   at: string;
-  /** Id do evento revertido (para `undo`). */
-  reverts?: string;
+  critical?: boolean;
+  levelsGained?: number;
+  hpHealed?: number;
+  mpHealed?: number;
+  pointsGained?: number;
+  /** Próxima ocorrência criada ao concluir uma tarefa recorrente. */
+  spawnedTaskId?: string;
+  /** Sequência da rotina antes da conclusão (para desfazer). */
+  streakBefore?: number;
+  /** Evento irreversível (ex.: desmaio no meio). */
+  final?: boolean;
+  /** Item comprado (compras). */
+  itemId?: string;
+  /** Preenchido quando o evento foi desfeito. */
+  revertedAt?: string;
+  /** Dano causado no chefe da semana (estornado ao desfazer). */
+  bossDamage?: number;
+  /** Semana (yyyy-MM-dd do início) do chefe atingido. */
+  bossWeek?: string;
+}
+
+/** Chefe da semana. */
+export interface BossState {
+  /** Primeiro dia (yyyy-MM-dd) da semana. */
+  week: string;
+  bossId: string;
+  maxHp: number;
+  /** Dano acumulado na semana. */
+  damage: number;
+  /** Quando foi derrotado (a recompensa é dada uma vez só). */
+  defeatedAt?: string;
+}
+
+/** Resultado do fechamento de um dia ("Relatório da noite"). */
+export interface NightReport {
+  /** Último dia fechado (yyyy-MM-dd). */
+  day: string;
+  missed: { title: string; difficulty: Difficulty; damage: number }[];
+  completed: string[];
+  streaksLost: { title: string; streak: number }[];
+  hpLost: number;
+  penaltiesEnabled: boolean;
+  faint: FaintInfo | null;
+}
+
+/** Dados da tela de "Game Over". */
+export interface FaintInfo {
+  xpLost: number;
+  goldLost: number;
+  level: number;
+}
+
+/** Contadores vitalícios para a tela de status. */
+export interface LifetimeStats {
+  tasksCompleted: number;
+  xpEarned: number;
+  goldEarned: number;
+  criticals: number;
+  bestStreak: number;
+  goldSpent: number;
+  itemsBought: number;
+  faints: number;
+  habitUps: number;
+  bossesDefeated: number;
 }
 
 export type ReducedMotionPref = 'system' | 'on' | 'off';

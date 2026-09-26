@@ -10,7 +10,7 @@ Especificação do produto. Siga-a fase a fase (seção 10). Ao terminar cada fa
 - Componentes do design system em `src/ui/` (`Window`, `Button`, `Bar`, `Cursor`, `Dialog`, `Tabs`, `Menu`). Navegação por teclado via `useMenuNavigation`.
 - Store: `src/store/`. Toda mudança de formato do estado persistido incrementa `STORE_VERSION` e ganha um passo em `migrations.ts` com teste.
 - Fórmulas de jogo: funções puras em `src/features/progression/formulas.ts`, com testes.
-- Nenhum asset de terceiros: pixel art gerada em código (`src/sprites/`), áudio via Web Audio.
+- Nenhum asset de terceiros (nada copiado de jogos ou pacotes prontos). Pixel art gerada em código (`src/sprites/`) ou criada com a ferramenta **SpriteCook** (geração de sprites por IA) para este projeto — sempre com design original, apenas *inspirado* em outros jogos. Áudio via Web Audio.
 
 ---
 
@@ -18,7 +18,7 @@ Especificação do produto. Siga-a fase a fase (seção 10). Ao terminar cada fa
 
 Aplicativo web de gerenciamento de tarefas no estilo do **Microsoft To Do** (listas, "Meu Dia", importantes, planejadas, subtarefas, datas, recorrência), combinado com a **gamificação do Habitica**: concluir tarefas dá **XP** e **Gold**, o personagem **sobe de nível**, e o Gold é gasto numa **loja de itens cosméticos**.
 
-Identidade visual evocando **JRPGs de 16 bits da era SNES**: janelas de menu com gradiente azul e borda chanfrada, fonte pixelada, sprites em pixel art, cursor de "mãozinha" piscando, sons chiptune. **Todos os assets devem ser originais.**
+Identidade visual evocando **JRPGs de 16 bits da era SNES**: janelas de menu com gradiente azul e borda chanfrada, fonte pixelada, sprites em pixel art, cursor de "mãozinha" piscando, sons chiptune. **Todos os assets devem ser originais** (feitos em código ou gerados com o SpriteCook para o projeto).
 
 Idioma: **português do Brasil**, estruturado com i18n para permitir inglês depois.
 
@@ -143,6 +143,6 @@ Ver `src/store/types.ts`. Manter log de eventos de recompensa (tarefa, XP, Gold,
 - Concluir/desfazer nunca deixa XP/Gold inconsistentes (testado)
 - Fórmulas puras com testes
 - Navegável por teclado
-- Sem assets de terceiros
+- Sem assets de terceiros (arte em código ou gerada com o SpriteCook, com design original)
 - Lighthouse: PWA instalável, acessibilidade ≥ 90
 - README com instruções, screenshots descritos e fórmulas

@@ -29,7 +29,17 @@ export function Cursor({ className }: CursorProps) {
   );
 }
 
-/** Espaço reservado à esquerda de botões/itens onde o cursor aparece. */
-export function CursorSlot({ visible }: { visible: boolean }) {
+/**
+ * Espaço reservado à esquerda de botões/itens onde o cursor aparece.
+ * `visible="css"` deixa o CSS decidir (hover, foco ou item atual).
+ */
+export function CursorSlot({ visible }: { visible: boolean | 'css' }) {
+  if (visible === 'css') {
+    return (
+      <span className="px-cursor-slot">
+        <Cursor className="px-cursor-auto" />
+      </span>
+    );
+  }
   return <span className="px-cursor-slot">{visible ? <Cursor /> : null}</span>;
 }

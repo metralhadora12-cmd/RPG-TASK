@@ -1,12 +1,15 @@
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { t } from '@/lib/i18n';
-import { useGameStore } from '@/store/useGameStore';
+import { createBackup, parseBackup, persistedPart } from '@/store/backup';
+import { useGameStore, type PersistedState } from '@/store/useGameStore';
+import { showToast } from '@/ui/toastStore';
 import type { ReducedMotionPref } from '@/store/types';
 import { Button } from '@/ui/Button';
 import { Dialog } from '@/ui/Dialog';
 import { themeIds, type ThemeId } from '@/ui/palette';
 import { Window } from '@/ui/Window';
+import { themeItemId } from '@/features/shop/catalog';
 
 function Row({ label, htmlFor, children }: { label: string; htmlFor?: string; children: ReactNode }) {
   return (
@@ -31,6 +34,24 @@ export function SettingsPage() {
   const settings = useGameStore((s) => s.settings);
   const update = useGameStore((s) => s.updateSettings);
   const resetProgress = useGameStore((s) => s.resetProgress);
+  const inventory = useGameStore((s) => s.character.inventory);
+  const ownedThemes = themeIds.filter((id) => {
+    const item = themeItemId(id);
+    return item && inventory.some((i) => i.itemId === item);
+  });
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [pendingImport, setPendingImport] = useState<PersistedState | null>(null);
+  const exportBackup = () => {
+    const backup = createBackup(persistedPart(useGameStore.getState()));
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `questlog-backup-${backup.exportedAt.slice(0, 10)}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showToast({ message: t('backup.exported') });
+  };
   const [resetStep, setResetStep] = useState<0 | 1 | 2 | 3>(0);
 
   return (
@@ -103,15 +124,50 @@ export function SettingsPage() {
             id="set-theme"
             className="px-input w-auto"
             value={settings.theme}
-            onChange={(e) => update({ theme: e.target.value as ThemeId })}
+            onChange={(e) => {
+              // Temas são itens da loja: escolher aqui equipa o tema possuído.
+              const item = themeItemId(e.target.value as ThemeId);
+              const store = useGameStore.getState();
+              if (item) store.equipItem(item);
+              else store.unequip('theme');
+            }}
           >
-            {themeIds.map((id) => (
+            {themeIds.filter((id) => id === 'classic' || id === settings.theme || ownedThemes.includes(id)).map((id) => (
               <option key={id} value={id}>
                 {t(`theme.${id}`)}
               </option>
             ))}
           </select>
         </Row>
+      </Window>
+
+      <Window title={t('backup.title')}>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="solid" onClick={exportBackup}>
+            {t('backup.export')}
+          </Button>
+          <Button variant="solid" onClick={() => fileRef.current?.click()}>
+            {t('backup.import')}
+          </Button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/json,.json"
+            className="hidden"
+            aria-label={t('backup.import')}
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              e.target.value = '';
+              if (!file) return;
+              const result = parseBackup(await file.text());
+              if (!result.ok) {
+                showToast({ message: t(result.reason === 'newer' ? 'backup.newer' : 'backup.invalid') });
+                return;
+              }
+              setPendingImport(result.state);
+            }}
+          />
+        </div>
       </Window>
 
       <Window>
@@ -125,6 +181,29 @@ export function SettingsPage() {
         </div>
       </Window>
 
+      <Dialog
+        open={Boolean(pendingImport)}
+        onClose={() => setPendingImport(null)}
+        title={t('backup.import')}
+        text={
+          pendingImport
+            ? t('backup.confirm', { name: pendingImport.character.name || '???', level: pendingImport.character.level })
+            : ''
+        }
+        actions={[
+          { label: t('common.no'), onSelect: () => setPendingImport(null) },
+          {
+            label: t('common.yes'),
+            variant: 'danger',
+            onSelect: () => {
+              if (!pendingImport) return;
+              useGameStore.getState().importSave(pendingImport);
+              showToast({ message: t('backup.imported', { name: pendingImport.character.name }) });
+              setPendingImport(null);
+            },
+          },
+        ]}
+      />
       <Dialog
         open={resetStep === 1}
         onClose={() => setResetStep(0)}

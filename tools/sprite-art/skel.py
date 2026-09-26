@@ -1,0 +1,16 @@
+"""Esqueleto da pose base (3/4, virado para a direita). Coordenadas do canvas 64×64."""
+NEAR_SHOULDER = (24.5, 30.5)
+NEAR_ELBOW = (21.0, 36.5)
+NEAR_WRIST = (18.5, 41.0)
+NEAR_FIST = (17.5, 43.0)
+FAR_SHOULDER = (38.0, 30.5)
+FAR_ELBOW = (42.0, 35.8)
+FAR_WRIST = (45.0, 38.5)
+FAR_FIST = (46.6, 39.3)
+NEAR_HIP = (28.0, 42.0)
+NEAR_KNEE = (25.0, 49.5)
+NEAR_ANKLE = (23.5, 56.0)
+FAR_HIP = (35.0, 42.0)
+FAR_KNEE = (39.5, 49.2)
+FAR_ANKLE = (41.0, 55.5)
+GROUND = 59  # última linha dos pés

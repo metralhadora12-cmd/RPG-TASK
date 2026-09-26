@@ -10,4 +10,5 @@ export const en: Partial<Record<MessageKey, string>> = {
   'common.yes': 'Yes',
   'common.no': 'No',
   'settings.title': 'Settings',
+  'boss.title': 'Weekly boss',
 };
