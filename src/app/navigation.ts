@@ -8,6 +8,7 @@ export interface NavEntry {
 }
 
 export const mainNav: NavEntry[] = [
+  { to: '/mundo', label: 'nav.world', icon: 'world' },
   { to: '/missoes', label: 'nav.quests', icon: 'quests' },
   { to: '/personagem', label: 'nav.character', icon: 'character' },
   { to: '/loja', label: 'nav.shop', icon: 'shop' },

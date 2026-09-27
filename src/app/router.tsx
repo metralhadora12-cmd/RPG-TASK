@@ -17,6 +17,7 @@ const ShopPage = page(() => import('@/features/shop/ShopPage'), 'ShopPage');
 const EquipmentPage = page(() => import('@/features/shop/EquipmentPage'), 'EquipmentPage');
 const SettingsPage = page(() => import('./pages/SettingsPage'), 'SettingsPage');
 const DevUiPage = page(() => import('./pages/DevUiPage'), 'DevUiPage');
+const WorldPage = page(() => import('@/features/world/WorldPage'), 'WorldPage');
 const DevSpritesPage = page(() => import('./pages/DevSpritesPage'), 'DevSpritesPage');
 
 export const routes: RouteObject[] = [
@@ -31,7 +32,8 @@ export const routes: RouteObject[] = [
   {
     element: <AppLayout />,
     children: [
-      { index: true, element: <Navigate to="/missoes" replace /> },
+      { index: true, element: <Navigate to="/mundo" replace /> },
+      { path: 'mundo', element: <WorldPage /> },
       {
         path: 'missoes',
         children: [

@@ -7,6 +7,7 @@ export const en: Partial<Record<MessageKey, string>> = {
   'nav.character': 'Character',
   'nav.shop': 'Shop',
   'nav.menu': 'Menu',
+  'nav.world': 'World',
   'common.yes': 'Yes',
   'common.no': 'No',
   'settings.title': 'Settings',

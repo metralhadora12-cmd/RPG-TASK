@@ -10,6 +10,7 @@ export const ptBR = {
   'nav.character': 'Personagem',
   'nav.shop': 'Loja',
   'nav.menu': 'Menu',
+  'nav.world': 'Mundo',
   'nav.main': 'Navegação principal',
   'nav.devUi': 'Design system',
   'nav.skipToContent': 'Pular para o conteúdo',
@@ -574,6 +575,23 @@ export const ptBR = {
   'dev.ui.damage': 'Dano',
   'dev.ui.heal': 'Curar',
   'dev.ui.selected': 'Escolhido: {item}',
+
+  'world.title': 'Vila do QuestLog',
+  'world.canvasLabel': 'Mundo 3D da vila: herói, mascote, quadro de missões e chefe da semana',
+  'world.places': 'Lugares da vila',
+  'world.overview': 'Ver a vila',
+  'world.board': 'Quadro de Missões',
+  'world.shop': 'Loja do Bartolo',
+  'world.house': 'Casa do Herói',
+  'world.tower': 'Torre do Sábio',
+  'world.arena': 'Arena do Chefe',
+  'world.enter': 'Entrar',
+  'world.boardEmpty': 'Nenhuma missão no Meu Dia. Escreva uma abaixo!',
+  'world.boardMore': '+{n} no Meu Dia',
+  'world.addPlaceholder': 'Nova missão para hoje…',
+  'world.add': 'Pregar',
+  'world.complete': 'Concluir: {title}',
+  'world.unsupported': 'Seu aparelho não conseguiu abrir o mundo 3D (WebGL indisponível).',
 } as const;
 
 export type MessageKey = keyof typeof ptBR;
