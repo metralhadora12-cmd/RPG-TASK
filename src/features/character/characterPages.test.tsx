@@ -71,7 +71,7 @@ describe('status e aparência', () => {
     expect(await screen.findByRole('heading', { name: 'Chefe da semana' })).toBeInTheDocument();
     const boss = store().boss!;
     expect(boss.damage).toBe(0);
-    expect(screen.getByText(/^(Rei Gosma|Dragão da Preguiça|Fantasma do Prazo|Gato do Caos)$/)).toBeInTheDocument();
+    expect(screen.getByText(/^(Demônio Rubro|Monstro de Sangue)$/)).toBeInTheDocument();
     expect(screen.getAllByRole('progressbar', { name: 'HP' }).length).toBeGreaterThanOrEqual(2);
   });
 

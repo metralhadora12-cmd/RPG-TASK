@@ -63,7 +63,7 @@ function Sidebar() {
 function BottomTabs() {
   return (
     <nav aria-label={t('nav.main')} className="win fixed inset-x-0 bottom-0 z-30 rounded-none px-1 py-1 md:hidden">
-      <ul className="grid grid-cols-4">
+      <ul className="grid grid-cols-5">
         {mainNav.map((entry) => {
           const icon = navIcons[entry.icon];
           return (
@@ -87,6 +87,8 @@ export function AppLayout() {
   const { pathname } = useLocation();
   const wide = useMediaQuery('(min-width: 768px)');
   const inQuests = wide && pathname.startsWith('/missoes');
+  // O mundo 3D ocupa a tela toda (sem margens nem barra lateral).
+  const inWorld = pathname.startsWith('/mundo');
   const needsHero = useGameStore((s) => !s.character.name);
   useReminders();
   useDayCycle();
@@ -94,7 +96,7 @@ export function AppLayout() {
   // Primeiro acesso: criação de personagem obrigatória (o /dev fica liberado).
   if (needsHero && !pathname.startsWith('/dev')) return <Navigate to="/criar" replace />;
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className={inWorld ? 'flex h-dvh flex-col overflow-hidden' : 'flex min-h-screen flex-col'}>
       <a
         href="#conteudo"
         className="win sr-only z-50 focus:not-sr-only focus:fixed focus:left-2 focus:top-2"
@@ -102,8 +104,8 @@ export function AppLayout() {
         {t('nav.skipToContent')}
       </a>
       <Hud />
-      <div className="mx-auto flex w-full max-w-6xl flex-1 gap-4 p-3 pb-28 sm:p-4 md:pb-4">
-        <aside className="hidden w-64 shrink-0 md:block">
+      <div className={inWorld ? 'flex min-h-0 w-full flex-1 pb-[4.5rem] md:pb-0' : 'mx-auto flex w-full max-w-6xl flex-1 gap-4 p-3 pb-28 sm:p-4 md:pb-4'}>
+        <aside className={inWorld ? 'hidden' : 'hidden w-64 shrink-0 md:block'}>
           <div className="sticky top-20 flex max-h-[calc(100vh-6rem)] flex-col gap-4 overflow-y-auto pb-1">
             <Sidebar />
             {inQuests ? (

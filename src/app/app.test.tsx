@@ -23,8 +23,16 @@ describe('App', () => {
     useGameStore.setState(heroState());
   });
 
-  it('redireciona / para Missões e mostra HUD e navegação', async () => {
+  it('abre a vila 3D em / (com aviso quando não há WebGL)', async () => {
     const router = renderAt('/');
+    expect(await screen.findByRole('heading', { name: 'Vila do QuestLog' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/mundo');
+    expect(screen.getByText(/WebGL indisponível/)).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: 'Lugares da vila' })).toBeInTheDocument();
+  });
+
+  it('redireciona /missoes para Meu Dia e mostra HUD e navegação', async () => {
+    const router = renderAt('/missoes');
     expect(await screen.findByRole('heading', { name: 'Meu Dia' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/missoes/meu-dia');
     expect(screen.getAllByRole('progressbar')).toHaveLength(3);
@@ -37,8 +45,8 @@ describe('App', () => {
     const [sidebar] = screen.getAllByRole('navigation', { name: 'Navegação principal' });
     const links = sidebar!.querySelectorAll('a');
     links[0]!.focus();
-    await user.keyboard('{ArrowDown}{ArrowDown}');
-    expect(links[2]).toHaveFocus();
+    await user.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}');
+    expect(links[3]).toHaveFocus();
     await user.keyboard('{Enter}');
     expect(router.state.location.pathname).toBe('/loja');
   });

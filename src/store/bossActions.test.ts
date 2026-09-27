@@ -70,6 +70,12 @@ describe('chefe da semana', () => {
     expect(taskGold).toBeGreaterThan(0);
   });
 
+  it('save com um chefe fora do rodízio mantém o dano com o chefe atual', () => {
+    const boss = store().syncBoss();
+    useGameStore.setState({ boss: { ...boss, bossId: 'chaos-cat', damage: 40 } });
+    expect(store().syncBoss()).toMatchObject({ bossId: boss.bossId, damage: 40 });
+  });
+
   it('semana nova traz outro chefe com HP cheio', () => {
     const id = store().addTask({ title: 'x', difficulty: 'medium' });
     store().completeTask(id, { random: noCrit });

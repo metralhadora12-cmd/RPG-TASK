@@ -15,8 +15,9 @@ describe('chefe da semana (fórmulas)', () => {
     const a = bossForWeek('2026-09-20');
     expect(BOSS_IDS).toContain(a);
     expect(bossForWeek('2026-09-27')).not.toBe(a);
-    const four = ['2026-09-20', '2026-09-27', '2026-10-04', '2026-10-11'].map(bossForWeek);
-    expect(new Set(four).size).toBe(4);
+    const weeks = ['2026-09-20', '2026-09-27', '2026-10-04', '2026-10-11'].map(bossForWeek);
+    expect(new Set(weeks).size).toBe(BOSS_IDS.length);
+    expect(weeks[2]).toBe(weeks[0]); // rodízio
   });
 
   it('HP cresce com o nível e tem teto', () => {

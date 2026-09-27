@@ -30,6 +30,33 @@ export const palette = {
 
 export type PaletteColor = keyof typeof palette;
 
+/** Cores do mundo 3D em cel-shading (cenário; herói, pets e chefes usam as paletas das peças). */
+export const worldPalette = {
+  outline: '#1a1428',
+  sky: '#8cc8f8',
+  skyFog: '#c8e4f8',
+  grass: '#6cc850',
+  grassDark: '#48a040',
+  dirt: '#a8784c',
+  dirtDark: '#6a4828',
+  path: '#e8d4a0',
+  stone: '#b8b8c8',
+  stoneDark: '#7c7c94',
+  wood: '#a8683c',
+  woodDark: '#6a3c20',
+  roofRed: '#d84838',
+  roofBlue: '#4868d0',
+  roofPurple: '#8050c0',
+  wall: '#f4e8d0',
+  leaf: '#48b848',
+  leafLight: '#78d860',
+  trunk: '#7a4a28',
+  paper: '#f8f0d8',
+  glow: '#f8e070',
+  hurt: '#ff4040',
+  shadow: '#000000',
+} as const;
+
 export type ThemeId = 'classic' | 'parchment' | 'forest' | 'lava' | 'starry';
 
 export interface WindowTheme {

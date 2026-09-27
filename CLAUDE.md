@@ -10,7 +10,7 @@ Especificação do produto. Siga-a fase a fase (seção 10). Ao terminar cada fa
 - Componentes do design system em `src/ui/` (`Window`, `Button`, `Bar`, `Cursor`, `Dialog`, `Tabs`, `Menu`). Navegação por teclado via `useMenuNavigation`.
 - Store: `src/store/`. Toda mudança de formato do estado persistido incrementa `STORE_VERSION` e ganha um passo em `migrations.ts` com teste.
 - Fórmulas de jogo: funções puras em `src/features/progression/formulas.ts`, com testes.
-- Nenhum asset de terceiros (nada copiado de jogos ou pacotes prontos). Pixel art gerada em código (`src/sprites/`) ou criada com a ferramenta **SpriteCook** (geração de sprites por IA) para este projeto — sempre com design original, apenas *inspirado* em outros jogos. Áudio via Web Audio.
+- Assets: pixel art gerada em código (`src/sprites/`) ou criada com a ferramenta **SpriteCook** para este projeto (design original, apenas *inspirado* em outros jogos). Pacotes de terceiros só com licença que permita o uso e com crédito na seção "Créditos" do README (hoje: chefes da semana, *Tiny RPG Character Asset Pack 02 — Free*, e os mascotes gatos). Nada copiado de jogos comerciais. Áudio via Web Audio.
 
 ---
 
@@ -143,6 +143,6 @@ Ver `src/store/types.ts`. Manter log de eventos de recompensa (tarefa, XP, Gold,
 - Concluir/desfazer nunca deixa XP/Gold inconsistentes (testado)
 - Fórmulas puras com testes
 - Navegável por teclado
-- Sem assets de terceiros (arte em código ou gerada com o SpriteCook, com design original)
+- Assets originais (código ou SpriteCook) ou de terceiros com licença que permita o uso e crédito no README
 - Lighthouse: PWA instalável, acessibilidade ≥ 90
 - README com instruções, screenshots descritos e fórmulas

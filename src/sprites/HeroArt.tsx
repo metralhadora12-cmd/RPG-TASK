@@ -1,7 +1,4 @@
-import { useMemo } from 'react';
-import type { PaletteLayer } from './types';
-import { paintLayers } from './compose';
-import { SpriteCanvas } from './SpriteCanvas';
+import type { ReactNode } from 'react';
 import { HERO_ART, HERO_ART_HEIGHT } from './heroArt';
 import { useReducedMotion } from '@/ui/useReducedMotion';
 import type { ClassId } from '@/store/types';
@@ -15,22 +12,11 @@ export interface HeroArtProps {
   scale?: number;
   /** Mostra só o busto (retrato do HUD). */
   bust?: boolean;
-  /** Mascote equipado (camada 64×64 do item), desenhado ao lado do herói. */
-  pet?: PaletteLayer;
+  /** Mascote equipado, desenhado ao lado do herói. */
+  pet?: ReactNode;
   animate?: boolean;
   label?: string;
   className?: string;
-}
-
-function petArt(layer: PaletteLayer) {
-  let x0 = 64, x1 = 0, y0 = 64, y1 = 0;
-  layer.rows.forEach((row, y) => {
-    for (let x = 0; x < row.length; x++) {
-      if (row[x] === '.') continue;
-      x0 = Math.min(x0, x); x1 = Math.max(x1, x + 1); y0 = Math.min(y0, y); y1 = Math.max(y1, y + 1);
-    }
-  });
-  return { grid: paintLayers([layer]), crop: { x: [x0, x1] as [number, number], y: [y0, y1] as [number, number] } };
 }
 
 /** O herói da classe (arte fixa), com respiração, vitória, desmaio e mascote. */
@@ -40,7 +26,6 @@ export function HeroArt({ classId, pose = 'idle', scale = 3, bust = false, pet, 
   const height = Math.round(64 * scale);
   const k = height / HERO_ART_HEIGHT;
   const width = Math.round(art.width * k);
-  const petGrid = useMemo(() => (pet ? petArt(pet) : null), [pet]);
   const moving = animate && !reduced;
 
   const img = (style: React.CSSProperties = {}, cls = '') => (
@@ -77,9 +62,9 @@ export function HeroArt({ classId, pose = 'idle', scale = 3, bust = false, pet, 
     );
   }
 
-  const petNode = petGrid ? (
+  const petNode = pet ? (
     <span className="self-end" style={{ marginLeft: -Math.round(scale * 2) }}>
-      <SpriteCanvas grid={petGrid.grid} crop={petGrid.crop} scale={Math.max(1, Math.round(scale))} />
+      {pet}
     </span>
   ) : null;
 

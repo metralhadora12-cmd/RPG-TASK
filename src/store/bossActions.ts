@@ -1,4 +1,4 @@
-import { bossForWeek, bossMaxHp, bossReward, weekKey } from '@/features/boss/boss';
+import { bossForWeek, bossMaxHp, bossReward, isBossId, weekKey } from '@/features/boss/boss';
 import { applyReward } from '@/features/progression/formulas';
 import { createId } from '@/lib/id';
 import { progressOf, REWARD_LOG_LIMIT, today } from './taskActions';
@@ -23,7 +23,10 @@ export interface BossActions {
 /** Chefe da semana corrente para o estado dado (sem gravar). */
 export function currentBoss(s: GameState, day: string): BossState {
   const week = weekKey(day, s.settings.weekStartsOn);
-  if (s.boss && s.boss.week === week) return s.boss;
+  if (s.boss && s.boss.week === week) {
+    // Saves com um chefe que saiu do rodízio mantêm o dano, com o chefe atual da semana.
+    return isBossId(s.boss.bossId) ? s.boss : { ...s.boss, bossId: bossForWeek(week) };
+  }
   return { week, bossId: bossForWeek(week), maxHp: bossMaxHp(s.character.level), damage: 0 };
 }
 

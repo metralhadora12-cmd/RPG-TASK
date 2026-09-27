@@ -15,6 +15,10 @@ export const navIcons = {
     matrix: ['...####...', '..#....#..', '.########.', '#BBBBBBBB#', '#BBBYYBBB#', '#BBYBBBBB#', '#BBBYYBBB#', '#BBBBBBBB#', '.########.'],
     colors: { '#': O, B: '#a86830', Y: palette.gold },
   },
+  world: {
+    matrix: ['...####...', '..#SSSS#..', '.#SSGGSS#.', '#SGGGGGSS#', '#SSGGGGSS#', '#GGGGGGGG#', '.#DDDDDD#.', '..#DDDD#..', '...#DD#...', '....##....'],
+    colors: { '#': O, S: palette.sky, G: palette.hpGreen, D: '#a8784c' },
+  },
   menu: {
     matrix: ['...#..#...', '..#W##W#..', '.#WWWWWW#.', '#WWW##WWW#', '.#W#..#W#.', '.#W#..#W#.', '#WWW##WWW#', '.#WWWWWW#.', '..#W##W#..', '...#..#...'],
     colors: { '#': O, W: palette.frost },
